@@ -32,7 +32,7 @@ public class Player2 extends Entity {
 	private int playerAction2 = IDLE;
 	private boolean moving = false, attacking2 = false, parrying2 = false, attacking22 = false, checkplayerhit2 = false, finish = false;
         private boolean getdmg1 = false, getdmg2 = false, getdmg3 = false, deathh = false, killed1 = false;
-	private boolean left2, up2, right2, down2, jump2;
+	private boolean left2, up2, right2, down2, jump2, defend;
 	private float playerSpeed2 = 1.8f;
 	private int[][] lvlData2;
 	private float xDrawOffset2 = 21 * Game.SCALE;
@@ -441,7 +441,14 @@ public class Player2 extends Entity {
                this.getdmg3 = getdmg3;
         }
         
-        
+        //DEFEND
+		public void defend(boolean defend){
+			if (defend) {
+				getdmg1 = false;
+				getdmg2 = false;
+				getdmg3 = false;
+			}
+	 }
         
         public void isdeath1(boolean killed1){
             this.killed1 = killed1;
@@ -509,6 +516,14 @@ public class Player2 extends Entity {
 
 	public void setJump2(boolean jump) {
 		this.jump2 = jump;
+	}
+
+	
+	public void setDefend(boolean defend){
+		this.defend = defend;
+	
+			defend(defend);
+		
 	}
 
 

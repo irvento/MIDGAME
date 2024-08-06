@@ -202,6 +202,10 @@ class UpdateTask extends TimerTask {
 
 			gamePanel.getGame().getPlayer1().setJump(false);
 			break;
+        
+        case KeyEvent.VK_S:
+            gamePanel.getGame().getPlayer1().setDefend(false);
+            break;
                     
                         
                 case KeyEvent.VK_Z:
@@ -317,6 +321,11 @@ class UpdateTask extends TimerTask {
 
 			gamePanel.getGame().getPlayer1().setJump(true);
 			break;
+
+            //defend
+            case KeyEvent.VK_S:
+            gamePanel.getGame().getPlayer1().setDefend(true);
+            break;    
                         
                         
                 case KeyEvent.VK_Z:   

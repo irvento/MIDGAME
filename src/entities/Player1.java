@@ -26,7 +26,7 @@ public class Player1 extends Entity {
 	private int playerAction = IDLE;
 	private boolean moving = false, attacking = false, parrying = false, attacking1 = false, checkplayerhit1 = false, finish = false;
         private boolean getdmg1 = false, getdmg2 = false, getdmg3 = false, deathh = false, killed2 = false;
-	private boolean left, up, right, down, jump;
+	private boolean left, up, right, down, jump, defend;
 	private float playerSpeed = 1.8f;
 	private int[][] lvlData;
 	private float xDrawOffset = 21 * Game.SCALE;
@@ -349,7 +349,7 @@ public class Player1 extends Entity {
 		}
 
 	}
-
+//charachter sprite picker
         BufferedImage png = null; 
 	private void loadAnimations() { 
 
@@ -367,7 +367,7 @@ public class Player1 extends Entity {
             png = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS5); 
          }
           
-
+//ANIMATIONS
 		BufferedImage img = png; 
 
 		animations = new BufferedImage[9][6];
@@ -439,6 +439,16 @@ public class Player1 extends Entity {
         public void player1getdmg3(boolean getdmg3){
                this.getdmg3 = getdmg3;
         }
+
+		//DEFEND
+		public void defend(boolean defend){
+			if(defend){
+				getdmg1 = false;
+				getdmg2 = false;
+				getdmg3 = false;	
+				checkplayerhit1 = false;
+			}
+		}
         
         
         public void isdeath2(boolean killed2){
@@ -505,6 +515,13 @@ public class Player1 extends Entity {
 
 	public void setJump(boolean jump) {
 		this.jump = jump;
+	}
+
+	public void setDefend(boolean defend){
+		this.defend = defend;
+	
+			defend(defend);
+		
 	}
 
 
