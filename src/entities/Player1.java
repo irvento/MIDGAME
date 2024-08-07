@@ -21,11 +21,11 @@ import utilz.LoadSave;
 public class Player1 extends Entity {
         CharacterPick p1 = new CharacterPick();
 	private BufferedImage[][] animations;
-        private boolean paused = true;
+    private boolean paused = true;
 	private int aniTick, aniIndex, aniSpeed = 25;
 	private int playerAction = IDLE;
 	private boolean moving = false, attacking = false, parrying = false, attacking1 = false, checkplayerhit1 = false, finish = false;
-        private boolean getdmg1 = false, getdmg2 = false, getdmg3 = false, deathh = false, killed2 = false;
+    private boolean getdmg1 = false, getdmg2 = false, getdmg3 = false, deathh = false, killed2 = false;
 	private boolean left, up, right, down, jump, defend;
 	private float playerSpeed = 1.8f;
 	private int[][] lvlData;
@@ -52,8 +52,9 @@ public class Player1 extends Entity {
 	private int healthBarXStart = (int) (17 * Game.SCALE);
 	private int healthBarYStart = (int) (34 * Game.SCALE);
 
-        
-        private int varvalue = p1.getChosen();  
+        //debug purposes
+		private int varvalue = 1;
+        //private int varvalue = p1.getChosen();  
 
     	private int maxHealth = maxhealth(varvalue);
 	public int currentHealth = maxHealth ;
@@ -64,9 +65,7 @@ public class Player1 extends Entity {
         public Rectangle2D.Float attackBox1;
         public KeyboardInputs KI;
         
-        
-        
-        
+
         
 	public Player1(float x, float y, int width, int height) {
 		super(x, y, width, height);
@@ -263,7 +262,7 @@ public class Player1 extends Entity {
               }else if(getdmg3 == true  && checkplayerhit1 == true){
                   hurt(damage3(varvalues));
                }else if(deathh){
-                   hurt(maxhealth(varvalue));
+                   hurt(maxhealth(varvalues));
                }
              
 
@@ -350,11 +349,12 @@ public class Player1 extends Entity {
 
 	}
 //charachter sprite picker
-        BufferedImage png = null; 
+
+//debug purposes
+       BufferedImage png = null; 
 	private void loadAnimations() { 
 
-
-         int varvalue = p1.getChosen();  
+         //int varvalue = p1.getChosen();  
           if (varvalue == 1) {  
             png = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS1); 
          }else if (varvalue == 2){  
@@ -366,6 +366,7 @@ public class Player1 extends Entity {
          } else if (varvalue == 5){  
             png = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS5); 
          }
+			
           
 //ANIMATIONS
 		BufferedImage img = png; 

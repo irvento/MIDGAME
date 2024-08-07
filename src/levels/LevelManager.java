@@ -22,7 +22,10 @@ public class LevelManager {
 	}
         
         private BufferedImage img = null;
-        private int map = p1.getmapinfo();
+
+		//debug purposes
+		private int map = 1;
+        //private int map = p1.getmapinfo();
         
 	private void importOutsideSprites() {
             if(map == 1){

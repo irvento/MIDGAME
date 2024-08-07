@@ -46,7 +46,7 @@ public class Player2 extends Entity {
 	private float jumpSpeed = -2.25f * Game.SCALE;
 	private float fallSpeedAfterCollision = 0.5f * Game.SCALE;
 	private boolean inAir = false;
-        private int varvalues = p2.getPicked();
+        
         private boolean b = false;
         private BufferedImage HealthBarImg2;
 
@@ -55,8 +55,10 @@ public class Player2 extends Entity {
 	private int statusBarX2 = (int) (810 * Game.SCALE);
 	private int statusBarY2 = (int) (10 * Game.SCALE);
 
-       
-               
+	//debug purposes
+    private int varvalues = 1;   
+	//private int varvalues = p2.getPicked();   
+
 	private int healthBarWidth2 = (int) (4 * Game.SCALE );
 	private int healthBarHeight2 = (int) (150 * Game.SCALE);
 	private int healthBarXStart2 = (int) (-20 * Game.SCALE);
@@ -203,7 +205,7 @@ public class Player2 extends Entity {
 		else
 			playerAction2 = IDLE;
 
-		if (inAir2) {
+		if (inAir) {
 			if (airSpeed < 0)
 				playerAction2 = JUMP;
 			else
