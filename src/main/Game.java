@@ -426,7 +426,7 @@ public class Game implements Runnable {
                     timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        hahahaha         
+                        // Error placeholder removed to fix syntax error
                     }
                 },1);
         }
