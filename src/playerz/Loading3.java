@@ -65,11 +65,6 @@ public class Loading3 extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         progressbar = new javax.swing.JProgressBar();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
 
@@ -91,40 +86,13 @@ public class Loading3 extends javax.swing.JFrame {
         progressbar.setStringPainted(true);
         jPanel1.add(progressbar);
         progressbar.setBounds(100, 760, 1430, 50);
-
-        jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\r.png")); // NOI18N
-        jLabel1.setText("jLabel1");
-        jPanel1.add(jLabel1);
-        jLabel1.setBounds(120, 300, 490, 190);
-
-        jLabel2.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\e.png")); // NOI18N
-        jLabel2.setText("jLabel2");
-        jPanel1.add(jLabel2);
-        jLabel2.setBounds(990, 280, 430, 180);
-
-        jLabel3.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\p.png")); // NOI18N
-        jLabel3.setText("jLabel3");
-        jPanel1.add(jLabel3);
-        jLabel3.setBounds(780, 80, 470, 190);
-
-        jLabel4.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\b.png")); // NOI18N
-        jLabel4.setText("jLabel4");
-        jPanel1.add(jLabel4);
-        jLabel4.setBounds(260, 500, 440, 210);
-
-        jLabel5.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\d.png")); // NOI18N
-        jLabel5.setText("jLabel5");
-        jPanel1.add(jLabel5);
-        jLabel5.setBounds(730, 460, 460, 210);
-
-        jLabel6.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\underworldlegendstxt.png")); // NOI18N
         jPanel1.add(jLabel6);
         jLabel6.setBounds(170, 70, 500, 190);
 
-        jLabel7.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\load3bgimg.jpg")); // NOI18N
+        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/loading_images/loading_bg4.gif"))); // NOI18N
         jLabel7.setText("jLabel7");
         jPanel1.add(jLabel7);
-        jLabel7.setBounds(0, -20, 1670, 990);
+        jLabel7.setBounds(0, 10, 1670, 990);
 
         getContentPane().add(jPanel1);
         jPanel1.setBounds(0, 0, 1664, 896);
@@ -168,11 +136,6 @@ public class Loading3 extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;

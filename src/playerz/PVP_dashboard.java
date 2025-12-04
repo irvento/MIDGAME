@@ -44,7 +44,6 @@ public class PVP_dashboard extends JFrame {
         jLabel2 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         playbutton = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -52,8 +51,8 @@ public class PVP_dashboard extends JFrame {
         jButton2 = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
 
-        jLabel2.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgbgbg (1).gif")); // NOI18N
         jLabel2.setText("jLabel2");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -75,7 +74,7 @@ public class PVP_dashboard extends JFrame {
 
         playbutton.setBackground(new java.awt.Color(255, 204, 51));
         playbutton.setFont(new java.awt.Font("Yu Gothic", 1, 18)); // NOI18N
-        playbutton.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\aaaaaaaaaaaaaaaaaaaa.png")); // NOI18N
+        playbutton.setText("PLAY");
         playbutton.setAlignmentY(0.0F);
         playbutton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 255, 0), new java.awt.Color(255, 255, 102), new java.awt.Color(255, 0, 0), new java.awt.Color(255, 51, 0)));
         playbutton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -96,27 +95,18 @@ public class PVP_dashboard extends JFrame {
         jPanel1.add(playbutton);
         playbutton.setBounds(670, 630, 350, 90);
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 100)); // NOI18N
-        jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\legendary.png")); // NOI18N
-        jPanel1.add(jLabel1);
-        jLabel1.setBounds(610, 350, 470, 170);
-
-        jLabel4.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\11111111111.png")); // NOI18N
-        jLabel4.setText("jLabel4");
+        jLabel4.setBackground(new java.awt.Color(255, 51, 51));
+        jLabel4.setFont(new java.awt.Font("Viner Hand ITC", 0, 90)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(204, 204, 0));
+        jLabel4.setText(" Underworld Legends");
         jPanel1.add(jLabel4);
-        jLabel4.setBounds(350, 110, 1010, 280);
-
-        jLabel5.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\IT13atxt.png")); // NOI18N
+        jLabel4.setBounds(300, 140, 1010, 280);
         jPanel1.add(jLabel5);
-        jLabel5.setBounds(1530, 850, 100, 29);
-
-        jLabel6.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\LOGOSZ.png")); // NOI18N
+        jLabel5.setBounds(1530, 850, 100, 0);
         jPanel1.add(jLabel6);
         jLabel6.setBounds(20, 40, 130, 60);
 
-        jButton1.setBackground(new java.awt.Color(255, 255, 255));
         jButton1.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(0, 0, 0));
         jButton1.setText("X");
         jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -136,7 +126,7 @@ public class PVP_dashboard extends JFrame {
             }
         });
         jPanel1.add(jButton2);
-        jButton2.setBounds(50, 840, 49, 24);
+        jButton2.setBounds(50, 840, 50, 24);
 
         jLabel7.setFont(new java.awt.Font("Yu Gothic Medium", 1, 14)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(255, 255, 255));
@@ -145,10 +135,17 @@ public class PVP_dashboard extends JFrame {
         jLabel7.setBounds(20, 10, 200, 30);
 
         jLabel3.setBackground(new java.awt.Color(0, 0, 0));
-        jLabel3.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bguw5.gif")); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/loading_images/loading_bg4.gif"))); // NOI18N
         jLabel3.setText("jLabel3");
         jPanel1.add(jLabel3);
         jLabel3.setBounds(0, 10, 1980, 880);
+
+        jLabel8.setBackground(new java.awt.Color(255, 51, 51));
+        jLabel8.setFont(new java.awt.Font("Viner Hand ITC", 0, 90)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(255, 255, 0));
+        jLabel8.setText("Underworld");
+        jPanel1.add(jLabel8);
+        jLabel8.setBounds(560, 70, 1010, 280);
 
         getContentPane().add(jPanel1);
         jPanel1.setBounds(0, 0, 1664, 896);
@@ -231,13 +228,13 @@ public class PVP_dashboard extends JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton playbutton;
     // End of variables declaration//GEN-END:variables
