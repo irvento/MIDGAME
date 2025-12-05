@@ -46,6 +46,9 @@ public class CharacterPick extends javax.swing.JFrame {
     
     private void replaceButtonWithAnimatedPanel(javax.swing.JToggleButton button, int characterId) {
         try {
+            // Remove ALL existing components first to prevent layering
+            button.removeAll();
+            
             // Remove existing icon and text
             button.setIcon(null);
             button.setText("");
@@ -74,7 +77,7 @@ public class CharacterPick extends javax.swing.JFrame {
             animatedPanel.setOpaque(false);
             animatedPanel.setVisible(true);
             
-            // Add panel to button
+            // Add ONLY the animated panel
             button.add(animatedPanel);
             
             // Bring to front
@@ -86,7 +89,6 @@ public class CharacterPick extends javax.swing.JFrame {
             // Force repaint
             button.revalidate();
             button.repaint();
-            animatedPanel.repaint();
         } catch (Exception e) {
             System.out.println("Error creating animated panel for character " + characterId + ": " + e.getMessage());
             e.printStackTrace();

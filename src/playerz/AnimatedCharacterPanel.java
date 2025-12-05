@@ -7,60 +7,22 @@ import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import utilz.LoadSave;
 import utilz.Constants.PlayerConstants;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class AnimatedCharacterPanel extends JPanel {
-    private BufferedImage[] idleFrames;
-    private static AtomicInteger globalAnimationTick = new AtomicInteger(0);
-    private static Thread sharedAnimationThread;
-    private static int panelCount = 0;
-    private static java.util.List<AnimatedCharacterPanel> allPanels = new java.util.ArrayList<>();
+    private BufferedImage characterImage; // Single static image, no animation
     private int characterId;
-    private int animationSpeed = 8; // Frames per animation update
     
     public AnimatedCharacterPanel(int characterId) {
         this.characterId = characterId;
         setOpaque(false);
         setVisible(true);
-        loadIdleAnimation();
-        
-        // Register this panel
-        synchronized (AnimatedCharacterPanel.class) {
-            allPanels.add(this);
-            panelCount++;
-            if (sharedAnimationThread == null || !sharedAnimationThread.isAlive()) {
-                sharedAnimationThread = new Thread(() -> {
-                    while (panelCount > 0) {
-                        try {
-                            Thread.sleep(150); // Update every 150ms (slower for less lag)
-                            globalAnimationTick.incrementAndGet();
-                            // Repaint all panels - use a static list to track all panels
-                            javax.swing.SwingUtilities.invokeLater(() -> {
-                                synchronized (AnimatedCharacterPanel.class) {
-                                    for (AnimatedCharacterPanel panel : allPanels) {
-                                        if (panel.isDisplayable() && panel.isVisible()) {
-                                            panel.repaint();
-                                        }
-                                    }
-                                }
-                            });
-                        } catch (InterruptedException e) {
-                            break;
-                        } catch (Exception e) {
-                            // Silently handle errors
-                        }
-                    }
-                });
-                sharedAnimationThread.setDaemon(true);
-                sharedAnimationThread.start();
-            }
-        }
+        loadCharacterImage(); // Load only a single static frame
     }
     
-    private void loadIdleAnimation() {
+    private void loadCharacterImage() {
         BufferedImage spriteSheet = null;
         
-        // Load appropriate sprite sheet based on character ID
+        // Load ONLY the sprite sheet for THIS specific character ID
         switch (characterId) {
             case 1:
                 spriteSheet = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS1);
@@ -77,34 +39,49 @@ public class AnimatedCharacterPanel extends JPanel {
             case 5:
                 spriteSheet = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS5);
                 break;
+            default:
+                // Unknown character ID - create placeholder
+                characterImage = new BufferedImage(64, 40, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = characterImage.createGraphics();
+                g2d.setColor(java.awt.Color.GRAY);
+                g2d.fillRect(0, 0, 64, 40);
+                g2d.dispose();
+                return;
         }
         
         if (spriteSheet == null) {
             // Create placeholder if sprite not found
-            idleFrames = new BufferedImage[1];
-            idleFrames[0] = new BufferedImage(64, 40, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = idleFrames[0].createGraphics();
+            characterImage = new BufferedImage(64, 40, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = characterImage.createGraphics();
             g2d.setColor(java.awt.Color.GRAY);
             g2d.fillRect(0, 0, 64, 40);
             g2d.dispose();
             return;
         }
         
-        // Extract idle animation frames (row 0, columns 0-4)
-        int idleFrameCount = PlayerConstants.GetSpriteAmount(PlayerConstants.IDLE);
-        idleFrames = new BufferedImage[idleFrameCount];
-        
+        // Extract ONLY the first idle frame (static image, no animation)
         int frameWidth = 64;
         int frameHeight = 40;
         int idleRow = PlayerConstants.IDLE;
         
-        for (int i = 0; i < idleFrameCount; i++) {
-            try {
-                idleFrames[i] = spriteSheet.getSubimage(i * frameWidth, idleRow * frameHeight, frameWidth, frameHeight);
-            } catch (Exception e) {
-                // If extraction fails, use first frame
-                idleFrames[i] = spriteSheet.getSubimage(0, idleRow * frameHeight, frameWidth, frameHeight);
+        try {
+            // Get the first idle frame (column 0, row 0)
+            if (frameWidth <= spriteSheet.getWidth() && 
+                frameHeight <= spriteSheet.getHeight()) {
+                characterImage = spriteSheet.getSubimage(0, idleRow * frameHeight, frameWidth, frameHeight);
+            } else {
+                // Fallback: use top-left corner
+                characterImage = spriteSheet.getSubimage(0, 0, 
+                    Math.min(frameWidth, spriteSheet.getWidth()), 
+                    Math.min(frameHeight, spriteSheet.getHeight()));
             }
+        } catch (Exception e) {
+            // If extraction fails, create placeholder
+            characterImage = new BufferedImage(frameWidth, frameHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = characterImage.createGraphics();
+            g2d.setColor(java.awt.Color.GRAY);
+            g2d.fillRect(0, 0, frameWidth, frameHeight);
+            g2d.dispose();
         }
     }
     
@@ -112,20 +89,8 @@ public class AnimatedCharacterPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-        if (idleFrames == null || idleFrames.length == 0) {
-            return;
-        }
-        
-        // Calculate current frame based on global tick
-        int tick = globalAnimationTick.get();
-        int currentFrame = (tick / animationSpeed) % idleFrames.length;
-        
-        if (currentFrame >= idleFrames.length) {
-            currentFrame = 0;
-        }
-        
-        BufferedImage frame = idleFrames[currentFrame];
-        if (frame == null) {
+        // Only draw if we have a valid image for THIS character
+        if (characterImage == null) {
             return;
         }
         
@@ -144,8 +109,8 @@ public class AnimatedCharacterPanel extends JPanel {
         }
         
         // Scale sprite to fit panel while maintaining aspect ratio
-        int spriteWidth = frame.getWidth();
-        int spriteHeight = frame.getHeight();
+        int spriteWidth = characterImage.getWidth();
+        int spriteHeight = characterImage.getHeight();
         
         if (spriteWidth <= 0 || spriteHeight <= 0) {
             return;
@@ -162,18 +127,12 @@ public class AnimatedCharacterPanel extends JPanel {
         int x = (panelWidth - scaledWidth) / 2;
         int y = (panelHeight - scaledHeight) / 2;
         
-        g2d.drawImage(frame, x, y, scaledWidth, scaledHeight, null);
+        // Draw ONLY this character's static image (no animation)
+        g2d.drawImage(characterImage, x, y, scaledWidth, scaledHeight, null);
     }
     
     public void stopAnimation() {
-        synchronized (AnimatedCharacterPanel.class) {
-            allPanels.remove(this);
-            panelCount--;
-            if (panelCount <= 0 && sharedAnimationThread != null) {
-                sharedAnimationThread.interrupt();
-                sharedAnimationThread = null;
-            }
-        }
+        // No animation to stop - method kept for compatibility
     }
 }
 

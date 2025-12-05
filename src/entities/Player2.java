@@ -66,6 +66,12 @@ public class Player2 extends Entity {
 	private int currentHealth2 = maxHealth2;
 	private int healthHeight2 = healthBarHeight2;
         
+        // Poison system for Plague Doctor
+        private boolean isPoisoned = false;
+        private long poisonStartTime = 0;
+        private long lastPoisonTick = 0;
+        private int poisonDuration = 5000; // 5 seconds in milliseconds
+        private int maxHealthForPoison = maxHealth2; // Store max health for poison calculation
         
         public Rectangle2D.Float attackBox2;
         public Rectangle2D.Float hitBox2;
@@ -113,11 +119,46 @@ public class Player2 extends Entity {
             
                 updateHealthBar();
                 updateAttackBox();
+                updateDash(); // Update dash movement
 		updatePos();
 		updateAnimationTick();
 		setAnimation();
                 getdmgs2();
+                updatePoison(); // Update poison damage over time
 	}
+        
+        private void updatePoison() {
+            if (isPoisoned) {
+                long currentTime = System.currentTimeMillis();
+                long elapsed = currentTime - poisonStartTime;
+                
+                if (elapsed < poisonDuration) {
+                    // Apply 3% HP damage per second
+                    // Check if 1 second has passed since last tick
+                    if (currentTime - lastPoisonTick >= 1000) {
+                        lastPoisonTick = currentTime;
+                        int poisonDamage = (int)(maxHealthForPoison * 0.03f);
+                        if (poisonDamage > 0) {
+                            hurt(poisonDamage);
+                        }
+                    }
+                } else {
+                    // Poison expired
+                    isPoisoned = false;
+                }
+            }
+        }
+        
+        public void applyPoison() {
+            isPoisoned = true;
+            poisonStartTime = System.currentTimeMillis();
+            lastPoisonTick = poisonStartTime;
+            maxHealthForPoison = maxHealth2; // Update max health reference
+        }
+        
+        public boolean isPoisoned() {
+            return isPoisoned;
+        }
         
         private void initAttackBox2() {
 		attackBox2 = new Rectangle2D.Float(x, y, (int) (30 * Game.SCALE), (int) (20 * Game.SCALE));
@@ -307,8 +348,24 @@ public class Player2 extends Entity {
 		aniIndex2 = 0;
 	}
 
+        // Movement disable flag
+        private boolean movementDisabled = false;
+        
+        public void setMovementDisabled(boolean disabled) {
+            this.movementDisabled = disabled;
+        }
+        
+        public boolean isMovementDisabled() {
+            return movementDisabled;
+        }
+        
 	private void updatePos() {
 		moving = false;
+                
+                // Don't allow movement if disabled
+                if (movementDisabled) {
+                    return;
+                }
 
 		if (jump2)
 			jump();
@@ -678,18 +735,16 @@ public class Player2 extends Entity {
             enemy.x = knockbackX;
         }
         
-        // Rhino-specific skills
-        public void dashAndPushEnemy(Player1 enemy, float dashDistance) {
-            if (enemy == null) return;
-            
-            // Determine dash direction based on facing direction
+        // Plague Doctor-specific skills
+        public void slashAndDashBack(float dashDistance) {
+            // Determine dash back direction (opposite of facing direction)
             float dashX;
             if (flipW == 1) {
-                // Facing right, dash right
-                dashX = hitbox.x + dashDistance;
-            } else {
-                // Facing left, dash left
+                // Facing right, dash back left
                 dashX = hitbox.x - dashDistance;
+            } else {
+                // Facing left, dash back right
+                dashX = hitbox.x + dashDistance;
             }
             
             // Ensure player stays within bounds
@@ -698,41 +753,127 @@ public class Player2 extends Entity {
             // Update player position
             hitbox.x = dashX;
             x = dashX;
+        }
+        
+        // Rhino-specific skills - Dash/Ram and Push Enemy
+        private boolean isDashing = false;
+        private float dashTargetX = 0;
+        private float dashSpeed = 8.0f * Game.SCALE;
+        private Player1 dashTargetEnemy = null;
+        private float dashPushDistance = 0;
+        
+        public void dashAndPushEnemy(Player1 enemy, float dashDistance) {
+            if (enemy == null || isDashing || currentHealth2 <= 0) return; // Don't dash if dead
             
-            // Check if enemy is in front and push them
-            Rectangle2D.Float dashBox = new Rectangle2D.Float();
+            // Determine dash direction based on facing direction
+            float targetX;
             if (flipW == 1) {
-                // Dash box extends forward to the right
-                dashBox.x = hitbox.x;
-                dashBox.y = hitbox.y;
-                dashBox.width = dashDistance + hitbox.width;
-                dashBox.height = hitbox.height;
+                // Facing right, dash right
+                targetX = hitbox.x + dashDistance;
             } else {
-                // Dash box extends forward to the left
-                dashBox.x = hitbox.x - dashDistance;
-                dashBox.y = hitbox.y;
-                dashBox.width = dashDistance + hitbox.width;
-                dashBox.height = hitbox.height;
+                // Facing left, dash left
+                targetX = hitbox.x - dashDistance;
             }
             
-            // If enemy hitbox intersects with dash box, push them
-            if (dashBox.intersects(enemy.getHitbox())) {
-                float pushDistance = Game.GAME_WIDTH / 8.0f; // 1/8 of map distance
-                float pushX;
-                
-                if (flipW == 1) {
-                    // Pushing enemy to the right
-                    pushX = enemy.getHitbox().x + pushDistance;
-                } else {
-                    // Pushing enemy to the left
-                    pushX = enemy.getHitbox().x - pushDistance;
+            // Ensure player stays within bounds
+            targetX = Math.max(0, Math.min(targetX, Game.GAME_WIDTH - hitbox.width));
+            
+            // Start dashing (will be updated gradually in updateDash method)
+            isDashing = true;
+            dashTargetX = targetX;
+            dashTargetEnemy = enemy;
+            dashPushDistance = dashDistance;
+            
+            player2attack3(true); // Trigger attack animation
+        }
+        
+        public void updateDash() {
+            if (isDashing && hitbox != null && currentHealth2 > 0) { // Don't dash if dead
+                try {
+                    float currentX = hitbox.x;
+                    float distance = Math.abs(dashTargetX - currentX);
+                    
+                    if (distance > dashSpeed) {
+                        // Move towards target
+                        if (dashTargetX > currentX) {
+                            hitbox.x += dashSpeed;
+                            x = hitbox.x;
+                        } else {
+                            hitbox.x -= dashSpeed;
+                            x = hitbox.x;
+                        }
+                        
+                        // Check collision during dash
+                        if (dashTargetEnemy != null && dashTargetEnemy.getHitbox() != null && !dashTargetEnemy.isdead1()) {
+                        Rectangle2D.Float dashBox = new Rectangle2D.Float();
+                        if (flipW == 1) {
+                            dashBox.x = hitbox.x;
+                            dashBox.y = hitbox.y;
+                            dashBox.width = dashPushDistance + hitbox.width;
+                            dashBox.height = hitbox.height;
+                        } else {
+                            dashBox.x = hitbox.x - dashPushDistance;
+                            dashBox.y = hitbox.y;
+                            dashBox.width = dashPushDistance + hitbox.width;
+                            dashBox.height = hitbox.height;
+                        }
+                        
+                        // If enemy hitbox intersects with dash box, push them and disable movement
+                        if (dashBox.intersects(dashTargetEnemy.getHitbox())) {
+                            try {
+                                // Deal damage first
+                                int damage = utilz.Constants.PlayerConstants.damage3(varvalues);
+                                dashTargetEnemy.hurt(damage);
+                                
+                                float pushDistance = Game.GAME_WIDTH / 8.0f; // 1/8 of map distance
+                                float pushX;
+                                
+                                if (flipW == 1) {
+                                    pushX = dashTargetEnemy.getHitbox().x + pushDistance;
+                                } else {
+                                    pushX = dashTargetEnemy.getHitbox().x - pushDistance;
+                                }
+                                
+                                // Ensure enemy stays within bounds
+                                pushX = Math.max(0, Math.min(pushX, Game.GAME_WIDTH - dashTargetEnemy.getHitbox().width));
+                                
+                                dashTargetEnemy.getHitbox().x = pushX;
+                                dashTargetEnemy.x = pushX;
+                                
+                                // Disable enemy movement for 1.5 seconds
+                                dashTargetEnemy.setMovementDisabled(true);
+                                Timer disableTimer = new Timer();
+                                disableTimer.schedule(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            if (dashTargetEnemy != null) {
+                                                dashTargetEnemy.setMovementDisabled(false);
+                                            }
+                                        } catch (Exception e) {
+                                            // Handle errors
+                                        }
+                                    }
+                                }, 1500); // 1.5 seconds
+                                
+                                dashTargetEnemy = null; // Clear reference after push
+                            } catch (Exception e) {
+                                // Handle errors to prevent crashes
+                            }
+                        }
+                    }
+                    } else {
+                        // Reached target
+                        hitbox.x = dashTargetX;
+                        x = dashTargetX;
+                        isDashing = false;
+                        dashTargetEnemy = null;
+                    }
+                } catch (Exception e) {
+                    // Handle errors to prevent crashes
+                    isDashing = false;
+                    dashTargetEnemy = null;
                 }
-                
-                // Ensure enemy stays within bounds
-                pushX = Math.max(0, Math.min(pushX, Game.GAME_WIDTH - enemy.getHitbox().width));
-                
-                enemy.getHitbox().x = pushX;
-                enemy.x = pushX;
             }
         }
         

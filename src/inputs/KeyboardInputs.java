@@ -531,8 +531,8 @@ class UpdateTask extends TimerTask {
                         
                         if (charId == 2) {
                             // Beheaded teleport skill
-                        soundeffects("src\\sounds\\kny-slice.wav");
-
+                            soundeffects("src\\sounds\\kny-slice.wav");
+                            
                             // Teleport in front of enemy
                             gamePanel.getGame().getPlayer1().teleportInFrontOfEnemy(gamePanel.getGame().getPlayer2());
                             
@@ -583,6 +583,75 @@ class UpdateTask extends TimerTask {
                                     }
                                 }
                             }, 300); // 0.3 seconds = 300ms
+                        } else if (charId == 4) {
+                            // Plague Doctor skill 2 - Poison slash
+                            soundeffects("src\\sounds\\kny-slice.wav");
+                            
+                            // Trigger attack animation
+                            gamePanel.getGame().getPlayer1().player1attack2(true);
+                            
+                            // Check collision and apply poison
+                            Timer poisonTimer = new Timer();
+                            poisonTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Rectangle2D.Float attackBox1 = gamePanel.getGame().getPlayer1().attackBox1;
+                                        Rectangle2D.Float hitbox2 = gamePanel.getGame().getPlayer2().getHitbox();
+                                        
+                                        if (attackBox1 != null && hitbox2 != null && attackBox1.intersects(hitbox2)) {
+                                            // Deal normal damage first
+                                            int damage = utilz.Constants.PlayerConstants.damage2(charId);
+                                            gamePanel.getGame().getPlayer2().hurt(damage);
+                                            
+                                            // Apply poison (3% HP per second for 5 seconds)
+                                            gamePanel.getGame().getPlayer2().applyPoison();
+                                            
+                                            // Set flags
+                                            gamePanel.getGame().getPlayer2().player2getdmg2(true);
+                                            gamePanel.getGame().getPlayer2().checkhit2(true);
+                                        } else {
+                                            // Still set flags even if no collision (for animation)
+                                            gamePanel.getGame().getPlayer2().player2getdmg2(true);
+                                        }
+                                    } catch (Exception e) {
+                                        // Handle errors
+                                    }
+                                }
+                            }, 100); // Small delay for attackbox
+                        } else if (charId == 1) {
+                            // Rhino skill 2 - Normal slash with damage
+                            soundeffects("src\\sounds\\kny-slice.wav");
+                            
+                            // Trigger attack animation
+                            gamePanel.getGame().getPlayer1().player1attack2(true);
+                            
+                            // Check collision and deal damage
+                            Timer damageTimer = new Timer();
+                            damageTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Rectangle2D.Float attackBox1 = gamePanel.getGame().getPlayer1().attackBox1;
+                                        Rectangle2D.Float hitbox2 = gamePanel.getGame().getPlayer2().getHitbox();
+                                        
+                                        if (attackBox1 != null && hitbox2 != null && attackBox1.intersects(hitbox2)) {
+                                            // Deal normal damage
+                                            int damage = utilz.Constants.PlayerConstants.damage2(charId);
+                                            gamePanel.getGame().getPlayer2().hurt(damage);
+                                            
+                                            // Set flags
+                                            gamePanel.getGame().getPlayer2().player2getdmg2(true);
+                                            gamePanel.getGame().getPlayer2().checkhit2(true);
+                                        } else {
+                                            // Still set flags even if no collision (for animation)
+                                            gamePanel.getGame().getPlayer2().player2getdmg2(true);
+                                        }
+                                    } catch (Exception e) {
+                                        // Handle errors
+                                    }
+                                }
+                            }, 100); // Small delay for attackbox
                         } else {
                             // Normal skill for other characters
                             soundeffects("src\\sounds\\kny-slice.wav");
@@ -625,6 +694,43 @@ class UpdateTask extends TimerTask {
                             
                             // Trigger attack animation
                             gamePanel.getGame().getPlayer1().player1attack3(true);
+                        } else if (charId == 4) {
+                            // Plague Doctor skill 3 - Slash and dash back
+                            soundeffects("src\\sounds\\sword_slash.wav");
+                            
+                            // Trigger attack animation
+                            gamePanel.getGame().getPlayer1().player1attack3(true);
+                            
+                            // Check collision and deal damage, then dash back
+                            Timer dashBackTimer = new Timer();
+                            dashBackTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Rectangle2D.Float attackBox1 = gamePanel.getGame().getPlayer1().attackBox1;
+                                        Rectangle2D.Float hitbox2 = gamePanel.getGame().getPlayer2().getHitbox();
+                                        
+                                        if (attackBox1 != null && hitbox2 != null && attackBox1.intersects(hitbox2)) {
+                                            // Deal normal damage
+                                            int damage = utilz.Constants.PlayerConstants.damage3(charId);
+                                            gamePanel.getGame().getPlayer2().hurt(damage);
+                                            
+                                            // Set flags
+                                            gamePanel.getGame().getPlayer2().player2getdmg3(true);
+                                            gamePanel.getGame().getPlayer2().checkhit2(true);
+                                        } else {
+                                            // Still set flags even if no collision (for animation)
+                                            gamePanel.getGame().getPlayer2().player2getdmg3(true);
+                                        }
+                                        
+                                        // Dash back 1/8 of map distance
+                                        float dashBackDistance = Game.GAME_WIDTH / 8.0f;
+                                        gamePanel.getGame().getPlayer1().slashAndDashBack(dashBackDistance);
+                                    } catch (Exception e) {
+                                        // Handle errors
+                                    }
+                                }
+                            }, 100); // Small delay for attackbox
                         } else {
                             // Normal skill for other characters
                             soundeffects("src\\sounds\\sword_slash.wav");
@@ -769,6 +875,43 @@ class UpdateTask extends TimerTask {
                             
                             // Trigger attack animation
                             gamePanel.getGame().getPlayer2().player2attack3(true);
+                        } else if (charId2 == 4) {
+                            // Plague Doctor skill 3 - Slash and dash back for Player 2
+                            soundeffects("src\\sounds\\sword_slash.wav");
+                            
+                            // Trigger attack animation
+                            gamePanel.getGame().getPlayer2().player2attack3(true);
+                            
+                            // Check collision and deal damage, then dash back
+                            Timer dashBackTimer = new Timer();
+                            dashBackTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Rectangle2D.Float attackBox2 = gamePanel.getGame().getPlayer2().attackBox2;
+                                        Rectangle2D.Float hitbox1 = gamePanel.getGame().getPlayer1().getHitbox();
+                                        
+                                        if (attackBox2 != null && hitbox1 != null && attackBox2.intersects(hitbox1)) {
+                                            // Deal normal damage
+                                            int damage = utilz.Constants.PlayerConstants.damage3(charId2);
+                                            gamePanel.getGame().getPlayer1().hurt(damage);
+                                            
+                                            // Set flags
+                                            gamePanel.getGame().getPlayer1().player1getdmg3(true);
+                                            gamePanel.getGame().getPlayer1().checkhit1(true);
+                                        } else {
+                                            // Still set flags even if no collision (for animation)
+                                            gamePanel.getGame().getPlayer1().player1getdmg3(true);
+                                        }
+                                        
+                                        // Dash back 1/8 of map distance
+                                        float dashBackDistance = Game.GAME_WIDTH / 8.0f;
+                                        gamePanel.getGame().getPlayer2().slashAndDashBack(dashBackDistance);
+                                    } catch (Exception e) {
+                                        // Handle errors
+                                    }
+                                }
+                            }, 100); // Small delay for attackbox
                         } else {
                             // Normal skill for other characters
                             soundeffects("src\\sounds\\sword_slash.wav");
