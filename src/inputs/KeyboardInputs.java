@@ -31,6 +31,7 @@ public class KeyboardInputs implements KeyListener {
         private final long COOLDOWN_TIME_SKILL1 = 1000;
         private final long COOLDOWN_TIME_SKILL2 = 3000;
         private final long COOLDOWN_TIME_SKILL3 = 4500;
+        private final long COOLDOWN_TIME_HADOUKEN = 2000;
         
         
         private boolean zKeyPressed = false;
@@ -45,6 +46,10 @@ public class KeyboardInputs implements KeyListener {
         private long num2LastPressedTime = 0;
         private boolean num3KeyPressed = false;
         private long num3LastPressedTime = 0;
+        private boolean vKeyPressed = false;
+        private long vLastPressedTime = 0;
+        private boolean num4KeyPressed = false;
+        private long num4LastPressedTime = 0;
         
             
         
@@ -91,6 +96,8 @@ class UpdateTask extends TimerTask {
                     gamePanel.getGame().getPlayer1().getDeath1(dead1);
                     gamePanel.getGame().getPlayer2().getDeath2(dead2);
                     
+                    // Check hadouken collisions
+                    checkHadoukenCollisions();
 
                     
                     gamePanel.getGame().getPlayer1().finish(finished);
@@ -165,6 +172,47 @@ class UpdateTask extends TimerTask {
                 return false; 
             
             
+        }
+        
+        private void checkHadoukenCollisions() {
+            if (gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) return;
+            
+            Rectangle2D.Float player1Hitbox = gamePanel.getGame().getPlayer1().getHitbox();
+            Rectangle2D.Float player2Hitbox = gamePanel.getGame().getPlayer2().getHitbox();
+            
+            // Check player2 hadoukens against player1
+            java.util.ArrayList<entities.Hadouken> player2Hadoukens = gamePanel.getGame().getPlayer2Hadoukens();
+            if (player2Hadoukens != null) {
+                java.util.Iterator<entities.Hadouken> it2 = player2Hadoukens.iterator();
+                while (it2.hasNext()) {
+                    entities.Hadouken h = it2.next();
+                    if (h != null && h.isActive() && h.getAttackBox() != null) {
+                        if (h.getAttackBox().intersects(player1Hitbox)) {
+                            // Deal damage to player1
+                            gamePanel.getGame().getPlayer1().hurt(h.getDamage());
+                            h.setActive(false);
+                            it2.remove();
+                        }
+                    }
+                }
+            }
+            
+            // Check player1 hadoukens against player2
+            java.util.ArrayList<entities.Hadouken> player1Hadoukens = gamePanel.getGame().getPlayer1Hadoukens();
+            if (player1Hadoukens != null) {
+                java.util.Iterator<entities.Hadouken> it1 = player1Hadoukens.iterator();
+                while (it1.hasNext()) {
+                    entities.Hadouken h = it1.next();
+                    if (h != null && h.isActive() && h.getAttackBox() != null) {
+                        if (h.getAttackBox().intersects(player2Hitbox)) {
+                            // Deal damage to player2
+                            gamePanel.getGame().getPlayer2().hurt(h.getDamage());
+                            h.setActive(false);
+                            it1.remove();
+                        }
+                    }
+                }
+            }
         }
 
         
@@ -265,6 +313,12 @@ class UpdateTask extends TimerTask {
                         gamePanel.getGame().getPlayer1().player1getdmg3(false);
                         gamePanel.getGame().getPlayer2().player2attack3(false);
                         num3KeyPressed = false;
+                        break;
+                case KeyEvent.VK_V:
+                        vKeyPressed = false;
+                        break;
+                case KeyEvent.VK_NUMPAD4:
+                        num4KeyPressed = false;
                         break;    
                 case KeyEvent.VK_ENTER:
                     /*CharacterPick cp = new CharacterPick();
@@ -428,6 +482,42 @@ class UpdateTask extends TimerTask {
                         num3LastPressedTime = System.currentTimeMillis();
                     }    
                         break;
+                case KeyEvent.VK_V:
+                    // Player 1 Hadouken
+                    if (!vKeyPressed && System.currentTimeMillis() - vLastPressedTime > COOLDOWN_TIME_HADOUKEN) {
+                        soundeffects("src\\sounds\\sword_slash.wav");
+                        gamePanel.getGame().spawnPlayer1Hadouken();
+                        vKeyPressed = true;
+                        vLastPressedTime = System.currentTimeMillis();
+                        // Reset cooldown flag after cooldown period
+                        Timer cooldownTimer = new Timer();
+                        cooldownTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                vKeyPressed = false;
+                                gamePanel.getGame().getPlayer1().setCanShootHadouken(true);
+                            }
+                        }, COOLDOWN_TIME_HADOUKEN);
+                    }
+                    break;
+                case KeyEvent.VK_NUMPAD4:
+                    // Player 2 Hadouken
+                    if (!num4KeyPressed && System.currentTimeMillis() - num4LastPressedTime > COOLDOWN_TIME_HADOUKEN) {
+                        soundeffects("src\\sounds\\sword_slash.wav");
+                        gamePanel.getGame().spawnPlayer2Hadouken();
+                        num4KeyPressed = true;
+                        num4LastPressedTime = System.currentTimeMillis();
+                        // Reset cooldown flag after cooldown period
+                        Timer cooldownTimer = new Timer();
+                        cooldownTimer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                num4KeyPressed = false;
+                                gamePanel.getGame().getPlayer2().setCanShootHadouken(true);
+                            }
+                        }, COOLDOWN_TIME_HADOUKEN);
+                    }
+                    break;
 		} 
 
 	}

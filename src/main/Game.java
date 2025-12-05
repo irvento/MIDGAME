@@ -2,10 +2,15 @@ package main;
 
 import java.awt.Graphics;
 
+import entities.Hadouken;
 import entities.Player1;
 import entities.Player2;
 import entities.trapp;
 import inputs.KeyboardInputs;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.Image;
 import java.io.File;
 import java.util.Timer;
@@ -32,6 +37,11 @@ public class Game implements Runnable {
         private Player2 player2;
         private KeyboardInputs KI;
 	private LevelManager levelManager;
+        
+        // Hadouken management
+        private ArrayList<Hadouken> player1Hadoukens = new ArrayList<>();
+        private ArrayList<Hadouken> player2Hadoukens = new ArrayList<>();
+        private BufferedImage[] hadoukenAnimations;
         
         private boolean health1 = false, health2 = false, killed1 = false, killed2 = false, win = false;
         private boolean rr1 = false, rr2 = false, rr3 = false, playagain = true;
@@ -104,6 +114,69 @@ public class Game implements Runnable {
                     round1 = false;
                     dialog = true;
                 }
+                
+                // Load hadouken animations
+                loadHadoukenAnimations();
+        }
+        
+        private void loadHadoukenAnimations() {
+            BufferedImage hadoukenSprite = utilz.LoadSave.GetSpriteAtlas(utilz.LoadSave.HADOUKEN_SPRITE);
+            if (hadoukenSprite == null) {
+                // Fallback: create a simple colored rectangle if sprite not found
+                hadoukenAnimations = new BufferedImage[1];
+                hadoukenAnimations[0] = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
+                java.awt.Graphics2D g2d = hadoukenAnimations[0].createGraphics();
+                g2d.setColor(java.awt.Color.BLUE);
+                g2d.fillOval(0, 0, 32, 32);
+                g2d.dispose();
+                return;
+            }
+            
+            // Try to extract frames if sprite sheet, otherwise use single image
+            int spriteWidth = hadoukenSprite.getWidth();
+            int spriteHeight = hadoukenSprite.getHeight();
+            
+            // Check if it's a sprite sheet (multiple frames) or single image
+            if (spriteWidth > spriteHeight * 2) {
+                // Likely a sprite sheet - extract frames
+                int frameCount = Math.min(4, spriteWidth / spriteHeight);
+                hadoukenAnimations = new BufferedImage[frameCount];
+                int frameWidth = spriteWidth / frameCount;
+                
+                for (int i = 0; i < frameCount; i++) {
+                    hadoukenAnimations[i] = hadoukenSprite.getSubimage(i * frameWidth, 0, frameWidth, spriteHeight);
+                }
+            } else {
+                // Single image - create animation array with same image
+                hadoukenAnimations = new BufferedImage[4];
+                for (int i = 0; i < 4; i++) {
+                    hadoukenAnimations[i] = hadoukenSprite;
+                }
+            }
+        }
+        
+        public void spawnPlayer1Hadouken() {
+            if (player1 != null && player1.canShootHadouken()) {
+                int dir = player1.getFacingDirection();
+                float spawnX = player1.getHadoukenSpawnX();
+                float spawnY = player1.getHadoukenSpawnY();
+                Hadouken hadouken = new Hadouken(spawnX, spawnY, (int)(32 * SCALE), (int)(32 * SCALE), dir);
+                hadouken.setAnimations(hadoukenAnimations);
+                player1Hadoukens.add(hadouken);
+                player1.setCanShootHadouken(false);
+            }
+        }
+        
+        public void spawnPlayer2Hadouken() {
+            if (player2 != null && player2.canShootHadouken()) {
+                int dir = player2.getFacingDirection();
+                float spawnX = player2.getHadoukenSpawnX();
+                float spawnY = player2.getHadoukenSpawnY();
+                Hadouken hadouken = new Hadouken(spawnX, spawnY, (int)(32 * SCALE), (int)(32 * SCALE), dir);
+                hadouken.setAnimations(hadoukenAnimations);
+                player2Hadoukens.add(hadouken);
+                player2.setCanShootHadouken(false);
+            }
         }
             
         
@@ -118,7 +191,11 @@ public class Game implements Runnable {
                 player2.loadLvlData2(levelManager.getCurrentLevel().getLevelData());
                 killed1 = false;
                 killed2 = false;
-                rr1 = false; 
+                rr1 = false;
+                // Clear hadoukens
+                player1Hadoukens.clear();
+                player2Hadoukens.clear();
+                resetHadoukenCooldowns(); 
             
                 round3 = true;
                 round2 = false;
@@ -136,6 +213,10 @@ public class Game implements Runnable {
             killed1 = false;
             killed2 = false;
             rr2 = false;
+            // Clear hadoukens
+            player1Hadoukens.clear();
+            player2Hadoukens.clear();
+            resetHadoukenCooldowns();
             
             round4 = true;
             round3 = false;
@@ -180,6 +261,7 @@ public class Game implements Runnable {
 		levelManager.update();
 		player1.update();
                 player2.update();
+                updateHadoukens();
                 resetClasses();
                
 	}
@@ -192,6 +274,7 @@ public class Game implements Runnable {
                 trap.drawBG(g);
                 trap.render(g);
                 levelManager.draw(g);
+                renderHadoukens(g);
                 player1.render(g);
                 player2.render(g);
                 trap.drawR1(g, rr1);
@@ -632,6 +715,89 @@ public class Game implements Runnable {
             }
         }
         
+        private void updateHadoukens() {
+            // Update player1 hadoukens
+            Iterator<Hadouken> it1 = player1Hadoukens.iterator();
+            while (it1.hasNext()) {
+                Hadouken h = it1.next();
+                h.update();
+                if (!h.isActive()) {
+                    it1.remove();
+                }
+            }
+            
+            // Update player2 hadoukens
+            Iterator<Hadouken> it2 = player2Hadoukens.iterator();
+            while (it2.hasNext()) {
+                Hadouken h = it2.next();
+                h.update();
+                if (!h.isActive()) {
+                    it2.remove();
+                }
+            }
+        }
+        
+        private void renderHadoukens(Graphics g) {
+            int xLvlOffset = 0; // You may need to adjust this based on camera offset
+            
+            // Render player1 hadoukens
+            for (Hadouken h : player1Hadoukens) {
+                h.draw(g, xLvlOffset);
+            }
+            
+            // Render player2 hadoukens
+            for (Hadouken h : player2Hadoukens) {
+                h.draw(g, xLvlOffset);
+            }
+        }
+        
+        private void checkHadoukenCollisions() {
+            if (player1 == null || player2 == null) return;
+            
+            Rectangle2D.Float player1Hitbox = player1.getHitbox();
+            Rectangle2D.Float player2Hitbox = player2.getHitbox();
+            
+            // Check player2 hadoukens against player1
+            Iterator<Hadouken> it2 = player2Hadoukens.iterator();
+            while (it2.hasNext()) {
+                Hadouken h = it2.next();
+                if (h.getAttackBox().intersects(player1Hitbox)) {
+                    // Deal damage to player1
+                    player1.hurt(h.getDamage());
+                    h.setActive(false);
+                    it2.remove();
+                }
+            }
+            
+            // Check player1 hadoukens against player2
+            Iterator<Hadouken> it1 = player1Hadoukens.iterator();
+            while (it1.hasNext()) {
+                Hadouken h = it1.next();
+                if (h.getAttackBox().intersects(player2Hitbox)) {
+                    // Deal damage to player2
+                    player2.hurt(h.getDamage());
+                    h.setActive(false);
+                    it1.remove();
+                }
+            }
+        }
+        
+        public void resetHadoukenCooldowns() {
+            if (player1 != null) {
+                player1.setCanShootHadouken(true);
+            }
+            if (player2 != null) {
+                player2.setCanShootHadouken(true);
+            }
+        }
+        
+        public ArrayList<Hadouken> getPlayer1Hadoukens() {
+            return player1Hadoukens;
+        }
+        
+        public ArrayList<Hadouken> getPlayer2Hadoukens() {
+            return player2Hadoukens;
+        }
         
          
 

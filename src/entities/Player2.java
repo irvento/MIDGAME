@@ -71,7 +71,10 @@ public class Player2 extends Entity {
         public Rectangle2D.Float hitBox2;
 
         private int flipX = 0;
-        private int flipW = 1;     
+        private int flipW = 1;
+        
+        // Hadouken management
+        private boolean canShootHadouken = true;     
 
         
                                          
@@ -525,6 +528,36 @@ public class Player2 extends Entity {
 			defend(defend);
 		
 	}
+        
+        // Hadouken methods
+        public int getFacingDirection() {
+            // Returns 1 for right, -1 for left
+            if (flipW == 1) {
+                return 1; // Facing right
+            } else {
+                return -1; // Facing left
+            }
+        }
+        
+        public float getHadoukenSpawnX() {
+            if (getFacingDirection() == 1) {
+                return hitbox.x + hitbox.width;
+            } else {
+                return hitbox.x - (32 * Game.SCALE);
+            }
+        }
+        
+        public float getHadoukenSpawnY() {
+            return hitbox.y + (hitbox.height / 2) - (16 * Game.SCALE);
+        }
+        
+        public void setCanShootHadouken(boolean canShoot) {
+            this.canShootHadouken = canShoot;
+        }
+        
+        public boolean canShootHadouken() {
+            return canShootHadouken;
+        }
 
 
 }
