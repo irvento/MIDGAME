@@ -63,6 +63,7 @@ public class LoadSave {
         public static final String LOAD6 = "gifload6.png";
         public static final String LOAD7 = "gifload7.png";
         public static final String HADOUKEN_SPRITE = "hadouken-hadoken-pixel-art-ryu-others-ebaf1db8385f74ce4698e932eaf5b5fe.png";
+        public static final String COLLISION_SPARK = "collisionspark.png";
 
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		BufferedImage img = null;

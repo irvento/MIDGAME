@@ -63,20 +63,31 @@ public class KeyboardInputs implements KeyListener {
         
 class deadtask extends TimerTask{
         public void run() {
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
+                    return;
+                }
+                
                 boolean player1daed = gamePanel.getGame().getPlayer1().isdead1();
                 boolean player2daed = gamePanel.getGame().getPlayer2().isdead2();       
                     
-                    gamePanel.getGame().getPlayer1().isdeath2(player2daed);
-                    gamePanel.getGame().getPlayer2().isdeath1(player1daed);
+                gamePanel.getGame().getPlayer1().isdeath2(player2daed);
+                gamePanel.getGame().getPlayer2().isdeath1(player1daed);
                     
-                    gamePanel.getGame().reset(player1daed, player2daed);
-
-                    
+                gamePanel.getGame().reset(player1daed, player2daed);
+            } catch (Exception e) {
+                // Silently handle errors to prevent crashes
+            }
         }
 }
         
 class UpdateTask extends TimerTask {
         public void run() {
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
+                    return;
+                }
+                
                 boolean result1 = checkCollisions1();
                 boolean result2 = checkCollisions2();
                 boolean dead1 = collisionwithdeath1();
@@ -85,24 +96,30 @@ class UpdateTask extends TimerTask {
                 boolean player2daed = gamePanel.getGame().getPlayer2().isdead2();       
                 boolean finished = gamePanel.getGame().finished();
 
-                    gamePanel.getGame().healthy1(deadhealth1());
-                    gamePanel.getGame().healthy2(deadhealth2());
+                gamePanel.getGame().healthy1(deadhealth1());
+                gamePanel.getGame().healthy2(deadhealth2());
+            
+                gamePanel.getGame().getPlayer2().checkhit2(result2);
+                gamePanel.getGame().getPlayer1().checkhit1(result1);
+                gamePanel.getGame().getPlayer2().checkhit2(result1);
+                gamePanel.getGame().getPlayer1().checkhit1(result2);
                 
-                    gamePanel.getGame().getPlayer2().checkhit2(result2);
-                    gamePanel.getGame().getPlayer1().checkhit1(result1);
-                    gamePanel.getGame().getPlayer2().checkhit2(result1);
-                    gamePanel.getGame().getPlayer1().checkhit1(result2);
-                    
-                    gamePanel.getGame().getPlayer1().getDeath1(dead1);
-                    gamePanel.getGame().getPlayer2().getDeath2(dead2);
-                    
-                    // Check hadouken collisions
-                    checkHadoukenCollisions();
+                // Check for beheaded C skill knockback (only when attackbox hits)
+                checkBeheadedKnockback(result1);
+                checkBeheadedKnockback(result2); // Also check Player2's knockback
+                
+                gamePanel.getGame().getPlayer1().getDeath1(dead1);
+                gamePanel.getGame().getPlayer2().getDeath2(dead2);
+                
+                // Check hadouken collisions
+                checkHadoukenCollisions();
 
-                    
-                    gamePanel.getGame().getPlayer1().finish(finished);
-                    gamePanel.getGame().getPlayer2().finish(finished);
-                    
+                gamePanel.getGame().getPlayer1().finish(finished);
+                gamePanel.getGame().getPlayer2().finish(finished);
+            } catch (Exception e) {
+                // Silently handle all errors to prevent crashes
+                // Don't print stack trace to avoid spam
+            }
         }
 }
 
@@ -123,62 +140,146 @@ class UpdateTask extends TimerTask {
         
         
         private boolean deadhealth1(){
-            return gamePanel.getGame().getPlayer1().deadlife1();
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null) {
+                    return false;
+                }
+                return gamePanel.getGame().getPlayer1().deadlife1();
+            } catch (Exception e) {
+                return false;
+            }
         }
         private boolean deadhealth2(){
-            return gamePanel.getGame().getPlayer2().deadlife2();
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer2() == null) {
+                    return false;
+                }
+                return gamePanel.getGame().getPlayer2().deadlife2();
+            } catch (Exception e) {
+                return false;
+            }
         }
         
         
         
         private boolean checkCollisions1() {
-            Rectangle2D.Float ATTACKBOX1 = gamePanel.getGame().getPlayer1().attackBox1;
-            Rectangle2D.Float HITBOX2 = gamePanel.getGame().getPlayer2().getHitbox();
-            if (ATTACKBOX1.intersects(HITBOX2)) {
-                
-                return true;
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
+                    return false;
+                }
+                Rectangle2D.Float ATTACKBOX1 = gamePanel.getGame().getPlayer1().attackBox1;
+                Rectangle2D.Float HITBOX2 = gamePanel.getGame().getPlayer2().getHitbox();
+                if (ATTACKBOX1 != null && HITBOX2 != null && ATTACKBOX1.intersects(HITBOX2)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                // Silently handle errors
             }
-                        return false;
-            } 
+            return false;
+        } 
         
         private boolean checkCollisions2() {
-            Rectangle2D.Float ATTACKBOX2 = gamePanel.getGame().getPlayer2().attackBox2;
-            Rectangle2D.Float HITBOX1 = gamePanel.getGame().getPlayer1().getHitbox(); 
-            
-            if (ATTACKBOX2.intersects(HITBOX1)) {
-                return true;
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
+                    return false;
+                }
+                Rectangle2D.Float ATTACKBOX2 = gamePanel.getGame().getPlayer2().attackBox2;
+                Rectangle2D.Float HITBOX1 = gamePanel.getGame().getPlayer1().getHitbox(); 
+                
+                if (ATTACKBOX2 != null && HITBOX1 != null && ATTACKBOX2.intersects(HITBOX1)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                // Silently handle errors
             }
-
-                return false;
-            }
+            return false;
+        }
         
         private boolean collisionwithdeath1(){
-            Rectangle2D.Float DEATH = gamePanel.getGame().getdeath().getHitbox();
-            Rectangle2D.Float HITBOX1 = gamePanel.getGame().getPlayer1().getHitbox(); 
-            
-            if (DEATH.intersects(HITBOX1)) {
-                return true;
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getdeath() == null || gamePanel.getGame().getPlayer1() == null) {
+                    return false;
+                }
+                Rectangle2D.Float DEATH = gamePanel.getGame().getdeath().getHitbox();
+                Rectangle2D.Float HITBOX1 = gamePanel.getGame().getPlayer1().getHitbox(); 
+                
+                if (DEATH != null && HITBOX1 != null && DEATH.intersects(HITBOX1)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                // Silently handle errors
             }
-
-                return false; 
+            return false; 
         }
         
         private boolean collisionwithdeath2(){
-            Rectangle2D.Float DEATH = gamePanel.getGame().getdeath().getHitbox();
-            Rectangle2D.Float HITBOX2 = gamePanel.getGame().getPlayer2().getHitbox();
-            if (DEATH.intersects(HITBOX2)) {
-                return true;
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getdeath() == null || gamePanel.getGame().getPlayer2() == null) {
+                    return false;
+                }
+                Rectangle2D.Float DEATH = gamePanel.getGame().getdeath().getHitbox();
+                Rectangle2D.Float HITBOX2 = gamePanel.getGame().getPlayer2().getHitbox();
+                if (DEATH != null && HITBOX2 != null && DEATH.intersects(HITBOX2)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                // Silently handle errors
             }
-                return false; 
-            
-            
+            return false; 
+        }
+        
+        private void checkBeheadedKnockback(boolean attackHit) {
+            try {
+                if (!attackHit || gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
+                    return;
+                }
+                
+                // Check if player1 is beheaded and C skill is ready
+                playerz.CharacterPick p1 = new playerz.CharacterPick();
+                int charId = p1.getChosen();
+                
+                if (charId == 2 && gamePanel.getGame().getPlayer1().isBeheadedKnockbackReady()) {
+                    // Calculate 50% of 1/4 map distance (50% reduction)
+                    float knockbackDistance = (main.Game.GAME_WIDTH / 4.0f) * 0.5f; // 50% of original
+                    
+                    // Knockback enemy
+                    gamePanel.getGame().getPlayer1().knockbackEnemy(gamePanel.getGame().getPlayer2(), knockbackDistance);
+                    
+                    // Reset flag
+                    gamePanel.getGame().getPlayer1().setBeheadedKnockbackReady(false);
+                }
+                
+                // Check if player2 is beheaded and Numpad 3 skill is ready
+                playerz.CharacterPick p2 = new playerz.CharacterPick();
+                int charId2 = p2.getPicked();
+                
+                if (charId2 == 2 && gamePanel.getGame().getPlayer2().isBeheadedKnockbackReady()) {
+                    // Calculate 50% of 1/4 map distance (50% reduction)
+                    float knockbackDistance = (main.Game.GAME_WIDTH / 4.0f) * 0.5f; // 50% of original
+                    
+                    // Knockback enemy
+                    gamePanel.getGame().getPlayer2().knockbackEnemy(gamePanel.getGame().getPlayer1(), knockbackDistance);
+                    
+                    // Reset flag
+                    gamePanel.getGame().getPlayer2().setBeheadedKnockbackReady(false);
+                }
+            } catch (Exception e) {
+                // Silently handle errors to prevent crashes
+            }
         }
         
         private void checkHadoukenCollisions() {
-            if (gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) return;
-            
-            Rectangle2D.Float player1Hitbox = gamePanel.getGame().getPlayer1().getHitbox();
-            Rectangle2D.Float player2Hitbox = gamePanel.getGame().getPlayer2().getHitbox();
+            try {
+                if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
+                    return;
+                }
+                
+                Rectangle2D.Float player1Hitbox = gamePanel.getGame().getPlayer1().getHitbox();
+                Rectangle2D.Float player2Hitbox = gamePanel.getGame().getPlayer2().getHitbox();
+                
+                if (player1Hitbox == null || player2Hitbox == null) {
+                    return;
+                }
             
             // Check player2 hadoukens against player1
             java.util.ArrayList<entities.Hadouken> player2Hadoukens = gamePanel.getGame().getPlayer2Hadoukens();
@@ -188,10 +289,23 @@ class UpdateTask extends TimerTask {
                     entities.Hadouken h = it2.next();
                     if (h != null && h.isActive() && h.getAttackBox() != null) {
                         if (h.getAttackBox().intersects(player1Hitbox)) {
-                            // Deal damage to player1
-                            gamePanel.getGame().getPlayer1().hurt(h.getDamage());
-                            h.setActive(false);
-                            it2.remove();
+                            try {
+                                // Spawn spark at collision point
+                                if (h.getAttackBox() != null) {
+                                    float sparkX = h.getAttackBox().x + h.getAttackBox().width / 2;
+                                    float sparkY = h.getAttackBox().y + h.getAttackBox().height / 2;
+                                    gamePanel.getGame().spawnCollisionSpark(sparkX, sparkY);
+                                }
+                                
+                                // Deal damage to player1
+                                gamePanel.getGame().getPlayer1().hurt(h.getDamage());
+                                h.setActive(false);
+                                it2.remove();
+                            } catch (Exception e) {
+                                // Handle error and continue
+                                h.setActive(false);
+                                it2.remove();
+                            }
                         }
                     }
                 }
@@ -205,13 +319,29 @@ class UpdateTask extends TimerTask {
                     entities.Hadouken h = it1.next();
                     if (h != null && h.isActive() && h.getAttackBox() != null) {
                         if (h.getAttackBox().intersects(player2Hitbox)) {
-                            // Deal damage to player2
-                            gamePanel.getGame().getPlayer2().hurt(h.getDamage());
-                            h.setActive(false);
-                            it1.remove();
+                            try {
+                                // Spawn spark at collision point
+                                if (h.getAttackBox() != null) {
+                                    float sparkX = h.getAttackBox().x + h.getAttackBox().width / 2;
+                                    float sparkY = h.getAttackBox().y + h.getAttackBox().height / 2;
+                                    gamePanel.getGame().spawnCollisionSpark(sparkX, sparkY);
+                                }
+                                
+                                // Deal damage to player2
+                                gamePanel.getGame().getPlayer2().hurt(h.getDamage());
+                                h.setActive(false);
+                                it1.remove();
+                            } catch (Exception e) {
+                                // Handle error and continue
+                                h.setActive(false);
+                                it1.remove();
+                            }
                         }
                     }
                 }
+            }
+            } catch (Exception e) {
+                // Silently handle errors to prevent crashes
             }
         }
 
@@ -394,28 +524,98 @@ class UpdateTask extends TimerTask {
                     }    
 			break;     
                 case KeyEvent.VK_X:
-                    
-                    
                     if (!xKeyPressed && System.currentTimeMillis() - xLastPressedTime > COOLDOWN_TIME_SKILL2) {
-                        soundeffects("src\\sounds\\kny-slice.wav");
-
+                        // Check if player1 is beheaded (character 2)
+                        playerz.CharacterPick p1 = new playerz.CharacterPick();
+                        int charId = p1.getChosen();
                         
-                        gamePanel.getGame().getPlayer2().player2getdmg2(true);
-                        gamePanel.getGame().getPlayer1().player1attack2(true);
+                        if (charId == 2) {
+                            // Beheaded teleport skill
+                            soundeffects("src\\sounds\\kny-slice.wav");
+                            
+                            // Teleport in front of enemy
+                            gamePanel.getGame().getPlayer1().teleportInFrontOfEnemy(gamePanel.getGame().getPlayer2());
+                            
+                            // Schedule slash after 0.3 seconds (300ms)
+                            Timer teleportTimer = new Timer();
+                            teleportTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        // Trigger attack animation
+                                        gamePanel.getGame().getPlayer1().player1attack2(true);
+                                        
+                                        // Update attackbox position after teleport
+                                        gamePanel.getGame().getPlayer1().updateAttackBoxAfterTeleport();
+                                        
+                                        // Small delay to ensure attackbox is updated
+                                        Timer damageTimer = new Timer();
+                                        damageTimer.schedule(new TimerTask() {
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    // Force update attackbox again
+                                                    gamePanel.getGame().getPlayer1().updateAttackBoxAfterTeleport();
+                                                    
+                                                    // Check collision manually and deal damage
+                                                    Rectangle2D.Float attackBox1 = gamePanel.getGame().getPlayer1().attackBox1;
+                                                    Rectangle2D.Float hitbox2 = gamePanel.getGame().getPlayer2().getHitbox();
+                                                    
+                                                    if (attackBox1 != null && hitbox2 != null && attackBox1.intersects(hitbox2)) {
+                                                        // Deal damage directly - 3500 for teleport skill
+                                                        int damage = 3500;
+                                                        gamePanel.getGame().getPlayer2().hurt(damage);
+                                                        
+                                                        // Set flags for consistency with normal attack system
+                                                        gamePanel.getGame().getPlayer2().player2getdmg2(true);
+                                                        gamePanel.getGame().getPlayer2().checkhit2(true);
+                                                    } else {
+                                                        // Still set flags even if no collision (for animation)
+                                                        gamePanel.getGame().getPlayer2().player2getdmg2(true);
+                                                    }
+                                                } catch (Exception e) {
+                                                    // Handle errors
+                                                }
+                                            }
+                                        }, 50); // Small delay to ensure attackbox is positioned
+                                    } catch (Exception e) {
+                                        // Handle errors
+                                    }
+                                }
+                            }, 300); // 0.3 seconds = 300ms
+                        } else {
+                            // Normal skill for other characters
+                            soundeffects("src\\sounds\\kny-slice.wav");
+                            gamePanel.getGame().getPlayer2().player2getdmg2(true);
+                            gamePanel.getGame().getPlayer1().player1attack2(true);
+                        }
                         
                         xKeyPressed = true;
                         xLastPressedTime = System.currentTimeMillis();
                     }
                         break; 
                 case KeyEvent.VK_C:
-                   
-                    
                     if (!cKeyPressed && System.currentTimeMillis() - cLastPressedTime > COOLDOWN_TIME_SKILL3) {
-                         soundeffects("src\\sounds\\sword_slash.wav");
+                        // Check if player1 is beheaded (character 2)
+                        playerz.CharacterPick p1 = new playerz.CharacterPick();
+                        int charId = p1.getChosen();
                         
-                        
-                        gamePanel.getGame().getPlayer2().player2getdmg3(true);
-                        gamePanel.getGame().getPlayer1().player1attack3(true);
+                        if (charId == 2) {
+                            // Beheaded skill - knockback will happen in UpdateTask when attackbox hits
+                            soundeffects("src\\sounds\\sword_slash.wav");
+                            
+                            // Set flag to enable knockback on hit
+                            gamePanel.getGame().getPlayer1().setBeheadedKnockbackReady(true);
+                            
+                            // Still do damage
+                            gamePanel.getGame().getPlayer2().player2getdmg3(true);
+                            gamePanel.getGame().getPlayer1().player1attack3(true);
+                        } else {
+                            // Normal skill for other characters
+                            soundeffects("src\\sounds\\sword_slash.wav");
+                            gamePanel.getGame().getPlayer2().player2getdmg3(true);
+                            gamePanel.getGame().getPlayer1().player1attack3(true);
+                        }
                         
                         cKeyPressed = true;
                         cLastPressedTime = System.currentTimeMillis();
@@ -454,13 +654,71 @@ class UpdateTask extends TimerTask {
                     }    
 			break;     
                 case KeyEvent.VK_NUMPAD2:
-                    
-                    
                     if (!num2KeyPressed && System.currentTimeMillis() - num2LastPressedTime > COOLDOWN_TIME_SKILL2) {
-                       soundeffects("src\\sounds\\kny-slice.wav");
-  
-                        gamePanel.getGame().getPlayer1().player1getdmg2(true);
-                        gamePanel.getGame().getPlayer2().player2attack2(true);
+                        // Check if player2 is beheaded (character 2)
+                        playerz.CharacterPick p2 = new playerz.CharacterPick();
+                        int charId2 = p2.getPicked();
+                        
+                        if (charId2 == 2) {
+                            // Beheaded teleport skill for Player 2
+                            soundeffects("src\\sounds\\kny-slice.wav");
+                            
+                            // Teleport in front of enemy
+                            gamePanel.getGame().getPlayer2().teleportInFrontOfEnemy(gamePanel.getGame().getPlayer1());
+                            
+                            // Schedule slash after 0.3 seconds (300ms)
+                            Timer teleportTimer = new Timer();
+                            teleportTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        // Trigger attack animation
+                                        gamePanel.getGame().getPlayer2().player2attack2(true);
+                                        
+                                        // Update attackbox position after teleport
+                                        gamePanel.getGame().getPlayer2().updateAttackBoxAfterTeleport();
+                                        
+                                        // Small delay to ensure attackbox is updated
+                                        Timer damageTimer = new Timer();
+                                        damageTimer.schedule(new TimerTask() {
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    // Force update attackbox again
+                                                    gamePanel.getGame().getPlayer2().updateAttackBoxAfterTeleport();
+                                                    
+                                                    // Check collision manually and deal damage
+                                                    Rectangle2D.Float attackBox2 = gamePanel.getGame().getPlayer2().attackBox2;
+                                                    Rectangle2D.Float hitbox1 = gamePanel.getGame().getPlayer1().getHitbox();
+                                                    
+                                                    if (attackBox2 != null && hitbox1 != null && attackBox2.intersects(hitbox1)) {
+                                                        // Deal damage directly - 3500 for teleport skill
+                                                        int damage = 3500;
+                                                        gamePanel.getGame().getPlayer1().hurt(damage);
+                                                        
+                                                        // Set flags for consistency with normal attack system
+                                                        gamePanel.getGame().getPlayer1().player1getdmg2(true);
+                                                        gamePanel.getGame().getPlayer1().checkhit1(true);
+                                                    } else {
+                                                        // Still set flags even if no collision (for animation)
+                                                        gamePanel.getGame().getPlayer1().player1getdmg2(true);
+                                                    }
+                                                } catch (Exception e) {
+                                                    // Handle errors
+                                                }
+                                            }
+                                        }, 50); // Small delay to ensure attackbox is positioned
+                                    } catch (Exception e) {
+                                        // Handle errors
+                                    }
+                                }
+                            }, 300); // 0.3 seconds = 300ms
+                        } else {
+                            // Normal skill for other characters
+                            soundeffects("src\\sounds\\kny-slice.wav");
+                            gamePanel.getGame().getPlayer1().player1getdmg2(true);
+                            gamePanel.getGame().getPlayer2().player2attack2(true);
+                        }
                         
                         num2KeyPressed = true;
                         num2LastPressedTime = System.currentTimeMillis();
@@ -469,14 +727,24 @@ class UpdateTask extends TimerTask {
                         
                         
                 case KeyEvent.VK_NUMPAD3:
-                    
-                    
                     if (!num3KeyPressed && System.currentTimeMillis() - num3LastPressedTime > COOLDOWN_TIME_SKILL3) {
-                       soundeffects("src\\sounds\\sword_slash.wav");
-
+                        // Check if player2 is beheaded (character 2)
+                        playerz.CharacterPick p2 = new playerz.CharacterPick();
+                        int charId2 = p2.getPicked();
                         
-                        gamePanel.getGame().getPlayer1().player1getdmg3  (true);
-                        gamePanel.getGame().getPlayer2().player2attack3(true);
+                        if (charId2 == 2) {
+                            // Beheaded knockback skill for Player 2
+                            soundeffects("src\\sounds\\sword_slash.wav");
+                            
+                            // Set knockback ready flag and trigger attack
+                            gamePanel.getGame().getPlayer2().setBeheadedKnockbackReady(true);
+                            gamePanel.getGame().getPlayer2().player2attack3(true);
+                        } else {
+                            // Normal skill for other characters
+                            soundeffects("src\\sounds\\sword_slash.wav");
+                            gamePanel.getGame().getPlayer1().player1getdmg3(true);
+                            gamePanel.getGame().getPlayer2().player2attack3(true);
+                        }
                        
                         num3KeyPressed = true;
                         num3LastPressedTime = System.currentTimeMillis();

@@ -2,6 +2,7 @@ package main;
 
 import java.awt.Graphics;
 
+import entities.CollisionSpark;
 import entities.Hadouken;
 import entities.Player1;
 import entities.Player2;
@@ -9,6 +10,7 @@ import entities.trapp;
 import inputs.KeyboardInputs;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.Image;
@@ -42,6 +44,10 @@ public class Game implements Runnable {
         private ArrayList<Hadouken> player1Hadoukens = new ArrayList<>();
         private ArrayList<Hadouken> player2Hadoukens = new ArrayList<>();
         private BufferedImage[] hadoukenAnimations;
+        
+        // Collision spark management
+        private ArrayList<CollisionSpark> collisionSparks = new ArrayList<>();
+        private BufferedImage collisionSparkSprite;
         
         private boolean health1 = false, health2 = false, killed1 = false, killed2 = false, win = false;
         private boolean rr1 = false, rr2 = false, rr3 = false, playagain = true;
@@ -106,8 +112,10 @@ public class Game implements Runnable {
                     levelManager = new LevelManager(this);
                     player1 = new Player1(325, 150, (int) (64 * SCALE), (int) (40 * SCALE));
                     player1.loadLvlData(levelManager.getCurrentLevel().getLevelData());
+                    player1.setGameInstance(this);
                     player2 = new Player2(1300, 150, (int) (64 * SCALE), (int) (40 * SCALE));
                     player2.loadLvlData2(levelManager.getCurrentLevel().getLevelData());
+                    player2.setGameInstance(this);
                     trap = new trapp(0,847, (int)(64 * SCALE), (int)(40 * SCALE));
                 
                     round2 = true;
@@ -117,6 +125,16 @@ public class Game implements Runnable {
                 
                 // Load hadouken animations
                 loadHadoukenAnimations();
+                // Load collision spark sprite
+                try {
+                    collisionSparkSprite = utilz.LoadSave.GetSpriteAtlas(utilz.LoadSave.COLLISION_SPARK);
+                    if (collisionSparkSprite == null) {
+                        System.out.println("Warning: Collision spark sprite not found, sparks will be disabled");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error loading collision spark sprite: " + e.getMessage());
+                    collisionSparkSprite = null;
+                }
         }
         
         private void loadHadoukenAnimations() {
@@ -186,9 +204,11 @@ public class Game implements Runnable {
                 soundeffects("src\\sounds\\round-2-fight.wav");
                 player1 = new Player1(325, 150, (int) (64 * SCALE), (int) (40 * SCALE));
                 player1.loadLvlData(levelManager.getCurrentLevel().getLevelData());
+                player1.setGameInstance(this);
                 
                 player2 = new Player2(1300, 150, (int) (64 * SCALE), (int) (40 * SCALE));
                 player2.loadLvlData2(levelManager.getCurrentLevel().getLevelData());
+                player2.setGameInstance(this);
                 killed1 = false;
                 killed2 = false;
                 rr1 = false;
@@ -207,9 +227,11 @@ public class Game implements Runnable {
                 soundeffects("src\\sounds\\round-3-fight.wav");
             player1 = new Player1(325, 150, (int) (64 * SCALE), (int) (40 * SCALE));
             player1.loadLvlData(levelManager.getCurrentLevel().getLevelData());
+            player1.setGameInstance(this);
                 
             player2 = new Player2(1300, 150, (int) (64 * SCALE), (int) (40 * SCALE));
             player2.loadLvlData2(levelManager.getCurrentLevel().getLevelData());
+            player2.setGameInstance(this);
             killed1 = false;
             killed2 = false;
             rr2 = false;
@@ -262,6 +284,7 @@ public class Game implements Runnable {
 		player1.update();
                 player2.update();
                 updateHadoukens();
+                updateCollisionSparks();
                 resetClasses();
                
 	}
@@ -275,6 +298,7 @@ public class Game implements Runnable {
                 trap.render(g);
                 levelManager.draw(g);
                 renderHadoukens(g);
+                renderCollisionSparks(g);
                 player1.render(g);
                 player2.render(g);
                 trap.drawR1(g, rr1);
@@ -797,6 +821,57 @@ public class Game implements Runnable {
         
         public ArrayList<Hadouken> getPlayer2Hadoukens() {
             return player2Hadoukens;
+        }
+        
+        private void updateCollisionSparks() {
+            try {
+                if (collisionSparks != null) {
+                    Iterator<CollisionSpark> it = collisionSparks.iterator();
+                    while (it.hasNext()) {
+                        CollisionSpark spark = it.next();
+                        if (spark != null) {
+                            spark.update();
+                            if (!spark.isActive()) {
+                                it.remove();
+                            }
+                        } else {
+                            it.remove();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Clear list on error to prevent crashes
+                if (collisionSparks != null) {
+                    collisionSparks.clear();
+                }
+            }
+        }
+        
+        private void renderCollisionSparks(Graphics g) {
+            try {
+                if (collisionSparks != null && g != null) {
+                    int xLvlOffset = 0;
+                    for (CollisionSpark spark : collisionSparks) {
+                        if (spark != null) {
+                            spark.draw(g, xLvlOffset);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Silently handle rendering errors
+            }
+        }
+        
+        public void spawnCollisionSpark(float x, float y) {
+            try {
+                if (collisionSparkSprite != null && collisionSparks != null) {
+                    CollisionSpark spark = new CollisionSpark(x, y, collisionSparkSprite);
+                    collisionSparks.add(spark);
+                }
+            } catch (Exception e) {
+                // Silently handle errors to prevent crashes
+                System.out.println("Error spawning collision spark: " + e.getMessage());
+            }
         }
         
          

@@ -13,7 +13,7 @@ public class Hadouken extends Entity {
     private int dir; // 1 for right, -1 for left
     private float speed = 5f;
     public Rectangle2D.Float attackBox;
-    private int damage = 1600; // Base damage for hadouken (8x original)
+    private int damage = 3500; 
     private int flipX = 0;
     private int flipW = 1;
 

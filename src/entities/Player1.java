@@ -67,6 +67,9 @@ public class Player1 extends Entity {
         // Hadouken management
         private boolean canShootHadouken = true;
         
+        // Beheaded knockback flag
+        private boolean beheadedKnockbackReady = false;
+        
         
         
         
@@ -115,17 +118,45 @@ public class Player1 extends Entity {
         }
         
                 
+        private main.Game gameInstance;
+        
+        public void setGameInstance(main.Game game) {
+            this.gameInstance = game;
+        }
+        
         public void hurt(int amount) {
-            int startAni = playerAction;
-		currentHealth -= amount;
-		if (currentHealth <= 0){
-			startAni = DEAD;
-
+            try {
+                int startAni = playerAction;
+                currentHealth -= amount;
+                
+                // Spawn collision spark at random location within hitbox
+                spawnCollisionSpark();
+                
+                if (currentHealth <= 0){
+                    startAni = DEAD;
+                } else {
+                    startAni = HURT;
                 }
-                else{
-                        startAni = HURT;
-                }
+            } catch (Exception e) {
+                // Silently handle errors to prevent crashes
+            }
 	}
+        
+        private void spawnCollisionSpark() {
+            try {
+                if (gameInstance != null && hitbox != null) {
+                    // Get random position within hitbox
+                    java.util.Random random = new java.util.Random();
+                    float sparkX = hitbox.x + random.nextFloat() * hitbox.width;
+                    float sparkY = hitbox.y + random.nextFloat() * hitbox.height;
+                    
+                    gameInstance.spawnCollisionSpark(sparkX, sparkY);
+                }
+            } catch (Exception e) {
+                // Silently handle errors to prevent crashes
+                System.out.println("Error in Player1 spawnCollisionSpark: " + e.getMessage());
+            }
+        }
 
         
         public static void exitAfter(float seconds) {
@@ -155,6 +186,16 @@ public class Player1 extends Entity {
 			attackBox1.x = hitbox.x + hitbox.width + (int) (Game.SCALE * 10);
 		else if (left)
 			attackBox1.x = hitbox.x - hitbox.width - (int) (Game.SCALE * 10);
+		else {
+			// If neither left nor right, use facing direction from flipW
+			if (flipW == 1) {
+				// Facing right
+				attackBox1.x = hitbox.x + hitbox.width + (int) (Game.SCALE * 10);
+			} else {
+				// Facing left
+				attackBox1.x = hitbox.x - hitbox.width - (int) (Game.SCALE * 10);
+			}
+		}
 
 		attackBox1.y = hitbox.y + (Game.SCALE * 10);
 	}
@@ -555,6 +596,107 @@ public class Player1 extends Entity {
         
         public boolean canShootHadouken() {
             return canShootHadouken;
+        }
+        
+        // Beheaded-specific skills
+        public void teleportInFrontOfEnemy(Player2 enemy) {
+            if (enemy == null) return;
+            
+            float enemyX = enemy.getHitbox().x;
+            float enemyY = enemy.getHitbox().y;
+            float enemyWidth = enemy.getHitbox().width;
+            float enemyHeight = enemy.getHitbox().height;
+            
+            // Get enemy's facing direction
+            int enemyFacingDir = enemy.getFacingDirection();
+            
+            // Determine teleport position based on ENEMY's facing direction
+            // Teleport closer to enemy (reduced distance)
+            float teleportX;
+            float teleportY;
+            
+            if (enemyFacingDir == 1) {
+                // Enemy facing right, teleport to the right (in front) of enemy, closer
+                teleportX = enemyX + enemyWidth + (10 * Game.SCALE); // Closer distance
+                // Face left to attack enemy
+                flipX = width;
+                flipW = -1;
+            } else {
+                // Enemy facing left, teleport to the left (in front) of enemy, closer
+                teleportX = enemyX - hitbox.width - (10 * Game.SCALE); // Closer distance
+                // Face right to attack enemy
+                flipX = 0;
+                flipW = 1;
+            }
+            
+            // Teleport relative to enemy's Y position (align vertically)
+            teleportY = enemyY + (enemyHeight / 2) - (hitbox.height / 2);
+            
+            // Ensure teleport Y is within bounds
+            if (teleportY < 0) teleportY = 0;
+            if (teleportY > Game.GAME_HEIGHT - hitbox.height) {
+                teleportY = Game.GAME_HEIGHT - hitbox.height;
+            }
+            
+            // Update position
+            hitbox.x = teleportX;
+            hitbox.y = teleportY;
+            x = teleportX;
+            y = teleportY;
+            
+            // Update attackbox immediately after teleport
+            updateAttackBox();
+        }
+        
+        public void updateAttackBoxAfterTeleport() {
+            // Force update attackbox after teleport
+            // Temporarily set direction flags based on facing direction
+            boolean wasRight = right;
+            boolean wasLeft = left;
+            
+            if (flipW == 1) {
+                right = true;
+                left = false;
+            } else {
+                right = false;
+                left = true;
+            }
+            
+            updateAttackBox();
+            
+            // Restore original flags
+            right = wasRight;
+            left = wasLeft;
+        }
+        
+        public void knockbackEnemy(Player2 enemy, float distance) {
+            if (enemy == null) return;
+            
+            // Determine knockback direction based on relative positions
+            float knockbackX;
+            if (hitbox.x < enemy.getHitbox().x) {
+                // Player is to the left, knockback right
+                knockbackX = enemy.getHitbox().x + distance;
+            } else {
+                // Player is to the right, knockback left
+                knockbackX = enemy.getHitbox().x - distance;
+            }
+            
+            // Ensure enemy doesn't go out of bounds
+            if (knockbackX < 0) knockbackX = 0;
+            if (knockbackX > Game.GAME_WIDTH - enemy.getHitbox().width) {
+                knockbackX = Game.GAME_WIDTH - enemy.getHitbox().width;
+            }
+            
+            enemy.getHitbox().x = knockbackX;
+        }
+        
+        public void setBeheadedKnockbackReady(boolean ready) {
+            this.beheadedKnockbackReady = ready;
+        }
+        
+        public boolean isBeheadedKnockbackReady() {
+            return beheadedKnockbackReady;
         }
 
 
