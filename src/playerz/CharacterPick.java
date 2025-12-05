@@ -22,7 +22,96 @@ public class CharacterPick extends javax.swing.JFrame {
     
     public CharacterPick() {
         initComponents();
+        // Delay initialization to ensure components are fully set up
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            initAnimatedPanels();
+        });
+    }
+    
+    private void initAnimatedPanels() {
+        // Replace static icons with animated panels for Player 1
+        replaceButtonWithAnimatedPanel(charac1, 1);
+        replaceButtonWithAnimatedPanel(charac2, 2);
+        replaceButtonWithAnimatedPanel(charac3, 3);
+        replaceButtonWithAnimatedPanel(charac4, 4);
+        replaceButtonWithAnimatedPanel(charac5, 5);
         
+        // Replace static icons with animated panels for Player 2
+        replaceButtonWithAnimatedPanel(charac1b, 1);
+        replaceButtonWithAnimatedPanel(charac2b, 2);
+        replaceButtonWithAnimatedPanel(charac3b, 3);
+        replaceButtonWithAnimatedPanel(charac4b, 4);
+        replaceButtonWithAnimatedPanel(charac5b, 5);
+    }
+    
+    private void replaceButtonWithAnimatedPanel(javax.swing.JToggleButton button, int characterId) {
+        try {
+            // Remove existing icon and text
+            button.setIcon(null);
+            button.setText("");
+            button.setContentAreaFilled(false);
+            button.setBorderPainted(true);
+            
+            // Set layout to null for absolute positioning
+            button.setLayout(null);
+            
+            // Get button dimensions
+            int width = button.getWidth();
+            int height = button.getHeight();
+            
+            // If button size is 0, use preferred size
+            if (width <= 0 || height <= 0) {
+                java.awt.Dimension prefSize = button.getPreferredSize();
+                width = prefSize.width > 0 ? prefSize.width : 140;
+                height = prefSize.height > 0 ? prefSize.height : 330;
+            }
+            
+            // Create animated panel
+            AnimatedCharacterPanel animatedPanel = new AnimatedCharacterPanel(characterId);
+            
+            // Set bounds to fill the button (leave some padding for border)
+            animatedPanel.setBounds(5, 5, width - 10, height - 10);
+            animatedPanel.setOpaque(false);
+            animatedPanel.setVisible(true);
+            
+            // Add panel to button
+            button.add(animatedPanel);
+            
+            // Bring to front
+            button.setComponentZOrder(animatedPanel, 0);
+            
+            // Store reference for cleanup
+            button.putClientProperty("animatedPanel", animatedPanel);
+            
+            // Force repaint
+            button.revalidate();
+            button.repaint();
+            animatedPanel.repaint();
+        } catch (Exception e) {
+            System.out.println("Error creating animated panel for character " + characterId + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void cleanupAnimations() {
+        // Stop all animations when window closes
+        javax.swing.JToggleButton[] buttons = {
+            charac1, charac2, charac3, charac4, charac5,
+            charac1b, charac2b, charac3b, charac4b, charac5b
+        };
+        
+        for (javax.swing.JToggleButton button : buttons) {
+            AnimatedCharacterPanel panel = (AnimatedCharacterPanel) button.getClientProperty("animatedPanel");
+            if (panel != null) {
+                panel.stopAnimation();
+            }
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        cleanupAnimations();
+        super.dispose();
     }
 
 
@@ -282,7 +371,13 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel2.setBounds(40, 90, 780, 370);
 
         map1.setBackground(new java.awt.Color(0, 0, 0, 50));
-        map1.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg2.png")); // NOI18N
+        // Load map preview image
+        java.awt.image.BufferedImage map1Img = utilz.LoadSave.GetSpriteAtlas(utilz.LoadSave.BGIMG1);
+        if (map1Img != null) {
+            map1.setIcon(new javax.swing.ImageIcon(map1Img));
+        } else {
+            map1.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg2.png")); // Fallback
+        }
         map1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0), new java.awt.Color(255, 0, 0)));
         map1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         map1.setMaximumSize(new java.awt.Dimension(285, 155));
@@ -297,7 +392,14 @@ public class CharacterPick extends javax.swing.JFrame {
         map1.setBounds(50, 560, 285, 155);
 
         map2.setBackground(new java.awt.Color(0, 0, 0, 50));
-        map2.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg3.png")); // NOI18N
+        // Load map preview image
+        java.awt.image.BufferedImage map2Img = utilz.LoadSave.GetSpriteAtlas(utilz.LoadSave.BGIMG2);
+        if (map2Img != null) {
+            // BGIMG2 is a GIF, try to load first frame or use BGIMG3
+            map2.setIcon(new javax.swing.ImageIcon(map2Img));
+        } else {
+            map2.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg3.png")); // Fallback
+        }
         map2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0), new java.awt.Color(255, 0, 0)));
         map2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         map2.setMaximumSize(new java.awt.Dimension(285, 155));
@@ -312,7 +414,14 @@ public class CharacterPick extends javax.swing.JFrame {
         map2.setBounds(360, 560, 285, 155);
 
         map3.setBackground(new java.awt.Color(0, 0, 0, 50));
-        map3.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg4.png")); // NOI18N
+        // Load map preview image
+        java.awt.image.BufferedImage map3Img = utilz.LoadSave.GetSpriteAtlas(utilz.LoadSave.BGIMG3);
+        if (map3Img != null) {
+            // BGIMG3 is a GIF, try to load first frame
+            map3.setIcon(new javax.swing.ImageIcon(map3Img));
+        } else {
+            map3.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg4.png")); // Fallback
+        }
         map3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0), new java.awt.Color(255, 0, 0)));
         map3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         map3.setMaximumSize(new java.awt.Dimension(285, 155));
@@ -327,7 +436,13 @@ public class CharacterPick extends javax.swing.JFrame {
         map3.setBounds(670, 560, 285, 155);
 
         map4.setBackground(new java.awt.Color(0, 0, 0, 50));
-        map4.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg5.png")); // NOI18N
+        // Load map preview image
+        java.awt.image.BufferedImage map4Img = utilz.LoadSave.GetSpriteAtlas(utilz.LoadSave.BGIMG4);
+        if (map4Img != null) {
+            map4.setIcon(new javax.swing.ImageIcon(map4Img));
+        } else {
+            map4.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg5.png")); // Fallback
+        }
         map4.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0), new java.awt.Color(255, 0, 0)));
         map4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         map4.setMaximumSize(new java.awt.Dimension(285, 155));

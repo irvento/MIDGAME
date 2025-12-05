@@ -194,7 +194,7 @@ public class Game implements Runnable {
                 hadouken.setAnimations(hadoukenAnimations);
                 player2Hadoukens.add(hadouken);
                 player2.setCanShootHadouken(false);
-            }
+                }
         }
             
         
@@ -211,7 +211,7 @@ public class Game implements Runnable {
                 player2.setGameInstance(this);
                 killed1 = false;
                 killed2 = false;
-                rr1 = false;
+                rr1 = false; 
                 // Clear hadoukens
                 player1Hadoukens.clear();
                 player2Hadoukens.clear();

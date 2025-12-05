@@ -71,8 +71,8 @@ public class Player2 extends Entity {
         public Rectangle2D.Float hitBox2;
 
         private int flipX = 0;
-        private int flipW = 1;
-        
+        private int flipW = 1;     
+
         // Hadouken management
         private boolean canShootHadouken = true;     
 
@@ -265,19 +265,19 @@ public class Player2 extends Entity {
         public void setGameInstance(main.Game game) {
             this.gameInstance = game;
         }
-        
+
         public void hurt(int amount) {
             try {
-                int startAni = playerAction2;
-                currentHealth2 -= amount;
+            int startAni = playerAction2;
+		currentHealth2 -= amount;
                 
                 // Spawn collision spark at random location within hitbox
                 spawnCollisionSpark();
                 
-                if (currentHealth2 <= 0){
-                    startAni = DEAD;
+		if (currentHealth2 <= 0){
+			startAni = DEAD;
                 } else {
-                    startAni = HURT;
+                        startAni = HURT;
                 }
             } catch (Exception e) {
                 // Silently handle errors to prevent crashes
@@ -297,8 +297,8 @@ public class Player2 extends Entity {
             } catch (Exception e) {
                 // Silently handle errors to prevent crashes
                 System.out.println("Error in Player2 spawnCollisionSpark: " + e.getMessage());
-            }
-        }
+                }
+	}
        
         
         
@@ -556,7 +556,7 @@ public class Player2 extends Entity {
 			defend(defend);
 		
 	}
-        
+
         // Hadouken methods
         public int getFacingDirection() {
             // Returns 1 for right, -1 for left
@@ -678,6 +678,64 @@ public class Player2 extends Entity {
             enemy.x = knockbackX;
         }
         
+        // Rhino-specific skills
+        public void dashAndPushEnemy(Player1 enemy, float dashDistance) {
+            if (enemy == null) return;
+            
+            // Determine dash direction based on facing direction
+            float dashX;
+            if (flipW == 1) {
+                // Facing right, dash right
+                dashX = hitbox.x + dashDistance;
+            } else {
+                // Facing left, dash left
+                dashX = hitbox.x - dashDistance;
+            }
+            
+            // Ensure player stays within bounds
+            dashX = Math.max(0, Math.min(dashX, Game.GAME_WIDTH - hitbox.width));
+            
+            // Update player position
+            hitbox.x = dashX;
+            x = dashX;
+            
+            // Check if enemy is in front and push them
+            Rectangle2D.Float dashBox = new Rectangle2D.Float();
+            if (flipW == 1) {
+                // Dash box extends forward to the right
+                dashBox.x = hitbox.x;
+                dashBox.y = hitbox.y;
+                dashBox.width = dashDistance + hitbox.width;
+                dashBox.height = hitbox.height;
+            } else {
+                // Dash box extends forward to the left
+                dashBox.x = hitbox.x - dashDistance;
+                dashBox.y = hitbox.y;
+                dashBox.width = dashDistance + hitbox.width;
+                dashBox.height = hitbox.height;
+            }
+            
+            // If enemy hitbox intersects with dash box, push them
+            if (dashBox.intersects(enemy.getHitbox())) {
+                float pushDistance = Game.GAME_WIDTH / 8.0f; // 1/8 of map distance
+                float pushX;
+                
+                if (flipW == 1) {
+                    // Pushing enemy to the right
+                    pushX = enemy.getHitbox().x + pushDistance;
+                } else {
+                    // Pushing enemy to the left
+                    pushX = enemy.getHitbox().x - pushDistance;
+                }
+                
+                // Ensure enemy stays within bounds
+                pushX = Math.max(0, Math.min(pushX, Game.GAME_WIDTH - enemy.getHitbox().width));
+                
+                enemy.getHitbox().x = pushX;
+                enemy.x = pushX;
+            }
+        }
+        
         private boolean beheadedKnockbackReady = false;
         
         public boolean isBeheadedKnockbackReady() {
@@ -687,7 +745,7 @@ public class Player2 extends Entity {
         public void setBeheadedKnockbackReady(boolean ready) {
             this.beheadedKnockbackReady = ready;
         }
-        
+
 }
 
 

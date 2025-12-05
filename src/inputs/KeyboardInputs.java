@@ -71,10 +71,10 @@ class deadtask extends TimerTask{
                 boolean player1daed = gamePanel.getGame().getPlayer1().isdead1();
                 boolean player2daed = gamePanel.getGame().getPlayer2().isdead2();       
                     
-                gamePanel.getGame().getPlayer1().isdeath2(player2daed);
-                gamePanel.getGame().getPlayer2().isdeath1(player1daed);
+                    gamePanel.getGame().getPlayer1().isdeath2(player2daed);
+                    gamePanel.getGame().getPlayer2().isdeath1(player1daed);
                     
-                gamePanel.getGame().reset(player1daed, player2daed);
+                    gamePanel.getGame().reset(player1daed, player2daed);
             } catch (Exception e) {
                 // Silently handle errors to prevent crashes
             }
@@ -96,26 +96,26 @@ class UpdateTask extends TimerTask {
                 boolean player2daed = gamePanel.getGame().getPlayer2().isdead2();       
                 boolean finished = gamePanel.getGame().finished();
 
-                gamePanel.getGame().healthy1(deadhealth1());
-                gamePanel.getGame().healthy2(deadhealth2());
-            
-                gamePanel.getGame().getPlayer2().checkhit2(result2);
-                gamePanel.getGame().getPlayer1().checkhit1(result1);
-                gamePanel.getGame().getPlayer2().checkhit2(result1);
-                gamePanel.getGame().getPlayer1().checkhit1(result2);
+                    gamePanel.getGame().healthy1(deadhealth1());
+                    gamePanel.getGame().healthy2(deadhealth2());
+                
+                    gamePanel.getGame().getPlayer2().checkhit2(result2);
+                    gamePanel.getGame().getPlayer1().checkhit1(result1);
+                    gamePanel.getGame().getPlayer2().checkhit2(result1);
+                    gamePanel.getGame().getPlayer1().checkhit1(result2);
                 
                 // Check for beheaded C skill knockback (only when attackbox hits)
                 checkBeheadedKnockback(result1);
                 checkBeheadedKnockback(result2); // Also check Player2's knockback
-                
-                gamePanel.getGame().getPlayer1().getDeath1(dead1);
-                gamePanel.getGame().getPlayer2().getDeath2(dead2);
-                
+                    
+                    gamePanel.getGame().getPlayer1().getDeath1(dead1);
+                    gamePanel.getGame().getPlayer2().getDeath2(dead2);
+                    
                 // Check hadouken collisions
                 checkHadoukenCollisions();
-
-                gamePanel.getGame().getPlayer1().finish(finished);
-                gamePanel.getGame().getPlayer2().finish(finished);
+                    
+                    gamePanel.getGame().getPlayer1().finish(finished);
+                    gamePanel.getGame().getPlayer2().finish(finished);
             } catch (Exception e) {
                 // Silently handle all errors to prevent crashes
                 // Don't print stack trace to avoid spam
@@ -144,7 +144,7 @@ class UpdateTask extends TimerTask {
                 if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null) {
                     return false;
                 }
-                return gamePanel.getGame().getPlayer1().deadlife1();
+            return gamePanel.getGame().getPlayer1().deadlife1();
             } catch (Exception e) {
                 return false;
             }
@@ -154,7 +154,7 @@ class UpdateTask extends TimerTask {
                 if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer2() == null) {
                     return false;
                 }
-                return gamePanel.getGame().getPlayer2().deadlife2();
+            return gamePanel.getGame().getPlayer2().deadlife2();
             } catch (Exception e) {
                 return false;
             }
@@ -167,49 +167,49 @@ class UpdateTask extends TimerTask {
                 if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
                     return false;
                 }
-                Rectangle2D.Float ATTACKBOX1 = gamePanel.getGame().getPlayer1().attackBox1;
-                Rectangle2D.Float HITBOX2 = gamePanel.getGame().getPlayer2().getHitbox();
+            Rectangle2D.Float ATTACKBOX1 = gamePanel.getGame().getPlayer1().attackBox1;
+            Rectangle2D.Float HITBOX2 = gamePanel.getGame().getPlayer2().getHitbox();
                 if (ATTACKBOX1 != null && HITBOX2 != null && ATTACKBOX1.intersects(HITBOX2)) {
-                    return true;
+                return true;
                 }
             } catch (Exception e) {
                 // Silently handle errors
             }
-            return false;
-        } 
+                        return false;
+            } 
         
         private boolean checkCollisions2() {
             try {
                 if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
                     return false;
                 }
-                Rectangle2D.Float ATTACKBOX2 = gamePanel.getGame().getPlayer2().attackBox2;
-                Rectangle2D.Float HITBOX1 = gamePanel.getGame().getPlayer1().getHitbox(); 
-                
+            Rectangle2D.Float ATTACKBOX2 = gamePanel.getGame().getPlayer2().attackBox2;
+            Rectangle2D.Float HITBOX1 = gamePanel.getGame().getPlayer1().getHitbox(); 
+            
                 if (ATTACKBOX2 != null && HITBOX1 != null && ATTACKBOX2.intersects(HITBOX1)) {
-                    return true;
+                return true;
                 }
             } catch (Exception e) {
                 // Silently handle errors
             }
-            return false;
-        }
+                return false;
+            }
         
         private boolean collisionwithdeath1(){
             try {
                 if (gamePanel.getGame() == null || gamePanel.getGame().getdeath() == null || gamePanel.getGame().getPlayer1() == null) {
                     return false;
                 }
-                Rectangle2D.Float DEATH = gamePanel.getGame().getdeath().getHitbox();
-                Rectangle2D.Float HITBOX1 = gamePanel.getGame().getPlayer1().getHitbox(); 
-                
+            Rectangle2D.Float DEATH = gamePanel.getGame().getdeath().getHitbox();
+            Rectangle2D.Float HITBOX1 = gamePanel.getGame().getPlayer1().getHitbox(); 
+            
                 if (DEATH != null && HITBOX1 != null && DEATH.intersects(HITBOX1)) {
-                    return true;
+                return true;
                 }
             } catch (Exception e) {
                 // Silently handle errors
             }
-            return false; 
+                return false; 
         }
         
         private boolean collisionwithdeath2(){
@@ -217,15 +217,15 @@ class UpdateTask extends TimerTask {
                 if (gamePanel.getGame() == null || gamePanel.getGame().getdeath() == null || gamePanel.getGame().getPlayer2() == null) {
                     return false;
                 }
-                Rectangle2D.Float DEATH = gamePanel.getGame().getdeath().getHitbox();
-                Rectangle2D.Float HITBOX2 = gamePanel.getGame().getPlayer2().getHitbox();
+            Rectangle2D.Float DEATH = gamePanel.getGame().getdeath().getHitbox();
+            Rectangle2D.Float HITBOX2 = gamePanel.getGame().getPlayer2().getHitbox();
                 if (DEATH != null && HITBOX2 != null && DEATH.intersects(HITBOX2)) {
-                    return true;
+                return true;
                 }
             } catch (Exception e) {
                 // Silently handle errors
             }
-            return false; 
+                return false; 
         }
         
         private void checkBeheadedKnockback(boolean attackHit) {
@@ -531,8 +531,8 @@ class UpdateTask extends TimerTask {
                         
                         if (charId == 2) {
                             // Beheaded teleport skill
-                            soundeffects("src\\sounds\\kny-slice.wav");
-                            
+                        soundeffects("src\\sounds\\kny-slice.wav");
+
                             // Teleport in front of enemy
                             gamePanel.getGame().getPlayer1().teleportInFrontOfEnemy(gamePanel.getGame().getPlayer2());
                             
@@ -586,8 +586,8 @@ class UpdateTask extends TimerTask {
                         } else {
                             // Normal skill for other characters
                             soundeffects("src\\sounds\\kny-slice.wav");
-                            gamePanel.getGame().getPlayer2().player2getdmg2(true);
-                            gamePanel.getGame().getPlayer1().player1attack2(true);
+                        gamePanel.getGame().getPlayer2().player2getdmg2(true);
+                        gamePanel.getGame().getPlayer1().player1attack2(true);
                         }
                         
                         xKeyPressed = true;
@@ -609,6 +609,21 @@ class UpdateTask extends TimerTask {
                             
                             // Still do damage
                             gamePanel.getGame().getPlayer2().player2getdmg3(true);
+                            gamePanel.getGame().getPlayer1().player1attack3(true);
+                        } else if (charId == 1) {
+                            // Rhino skill - dash and push enemy
+                            soundeffects("src\\sounds\\sword_slash.wav");
+                            
+                            // Dash distance (can be adjusted)
+                            float dashDistance = 100 * Game.SCALE;
+                            
+                            // Perform dash and push enemy
+                            gamePanel.getGame().getPlayer1().dashAndPushEnemy(
+                                gamePanel.getGame().getPlayer2(), 
+                                dashDistance
+                            );
+                            
+                            // Trigger attack animation
                             gamePanel.getGame().getPlayer1().player1attack3(true);
                         } else {
                             // Normal skill for other characters
@@ -661,8 +676,8 @@ class UpdateTask extends TimerTask {
                         
                         if (charId2 == 2) {
                             // Beheaded teleport skill for Player 2
-                            soundeffects("src\\sounds\\kny-slice.wav");
-                            
+                       soundeffects("src\\sounds\\kny-slice.wav");
+  
                             // Teleport in front of enemy
                             gamePanel.getGame().getPlayer2().teleportInFrontOfEnemy(gamePanel.getGame().getPlayer1());
                             
@@ -716,8 +731,8 @@ class UpdateTask extends TimerTask {
                         } else {
                             // Normal skill for other characters
                             soundeffects("src\\sounds\\kny-slice.wav");
-                            gamePanel.getGame().getPlayer1().player1getdmg2(true);
-                            gamePanel.getGame().getPlayer2().player2attack2(true);
+                        gamePanel.getGame().getPlayer1().player1getdmg2(true);
+                        gamePanel.getGame().getPlayer2().player2attack2(true);
                         }
                         
                         num2KeyPressed = true;
@@ -728,7 +743,7 @@ class UpdateTask extends TimerTask {
                         
                 case KeyEvent.VK_NUMPAD3:
                     if (!num3KeyPressed && System.currentTimeMillis() - num3LastPressedTime > COOLDOWN_TIME_SKILL3) {
-                        // Check if player2 is beheaded (character 2)
+                        // Check character ID
                         playerz.CharacterPick p2 = new playerz.CharacterPick();
                         int charId2 = p2.getPicked();
                         
@@ -738,6 +753,21 @@ class UpdateTask extends TimerTask {
                             
                             // Set knockback ready flag and trigger attack
                             gamePanel.getGame().getPlayer2().setBeheadedKnockbackReady(true);
+                            gamePanel.getGame().getPlayer2().player2attack3(true);
+                        } else if (charId2 == 1) {
+                            // Rhino skill - dash and push enemy for Player 2
+                            soundeffects("src\\sounds\\sword_slash.wav");
+                            
+                            // Dash distance (can be adjusted)
+                            float dashDistance = 100 * Game.SCALE;
+                            
+                            // Perform dash and push enemy
+                            gamePanel.getGame().getPlayer2().dashAndPushEnemy(
+                                gamePanel.getGame().getPlayer1(), 
+                                dashDistance
+                            );
+                            
+                            // Trigger attack animation
                             gamePanel.getGame().getPlayer2().player2attack3(true);
                         } else {
                             // Normal skill for other characters
@@ -784,8 +814,8 @@ class UpdateTask extends TimerTask {
                                 gamePanel.getGame().getPlayer2().setCanShootHadouken(true);
                             }
                         }, COOLDOWN_TIME_HADOUKEN);
-                    }
-                    break;
+                    }    
+                        break;
 		} 
 
 	}
