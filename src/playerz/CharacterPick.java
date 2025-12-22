@@ -1,8 +1,6 @@
 
 package playerz;
 
-
-
 import java.io.*;
 import java.util.Random;
 import java.util.logging.Level;
@@ -17,9 +15,9 @@ import main.GameRounds;
 import main.MusicPlayer;
 
 public class CharacterPick extends javax.swing.JFrame {
-    
-    MusicPlayer musicPlayer = new MusicPlayer(); 
-    
+
+    MusicPlayer musicPlayer = new MusicPlayer();
+
     public CharacterPick() {
         initComponents();
         // Delay initialization to ensure components are fully set up
@@ -27,7 +25,7 @@ public class CharacterPick extends javax.swing.JFrame {
             initAnimatedPanels();
         });
     }
-    
+
     private void initAnimatedPanels() {
         // Replace static icons with animated panels for Player 1
         replaceButtonWithAnimatedPanel(charac1, 1);
@@ -35,7 +33,7 @@ public class CharacterPick extends javax.swing.JFrame {
         replaceButtonWithAnimatedPanel(charac3, 3);
         replaceButtonWithAnimatedPanel(charac4, 4);
         replaceButtonWithAnimatedPanel(charac5, 5);
-        
+
         // Replace static icons with animated panels for Player 2
         replaceButtonWithAnimatedPanel(charac1b, 1);
         replaceButtonWithAnimatedPanel(charac2b, 2);
@@ -43,49 +41,49 @@ public class CharacterPick extends javax.swing.JFrame {
         replaceButtonWithAnimatedPanel(charac4b, 4);
         replaceButtonWithAnimatedPanel(charac5b, 5);
     }
-    
+
     private void replaceButtonWithAnimatedPanel(javax.swing.JToggleButton button, int characterId) {
         try {
             // Remove ALL existing components first to prevent layering
             button.removeAll();
-            
+
             // Remove existing icon and text
             button.setIcon(null);
             button.setText("");
             button.setContentAreaFilled(false);
             button.setBorderPainted(true);
-            
+
             // Set layout to null for absolute positioning
             button.setLayout(null);
-            
+
             // Get button dimensions
             int width = button.getWidth();
             int height = button.getHeight();
-            
+
             // If button size is 0, use preferred size
             if (width <= 0 || height <= 0) {
                 java.awt.Dimension prefSize = button.getPreferredSize();
                 width = prefSize.width > 0 ? prefSize.width : 140;
                 height = prefSize.height > 0 ? prefSize.height : 330;
             }
-            
+
             // Create animated panel
             AnimatedCharacterPanel animatedPanel = new AnimatedCharacterPanel(characterId);
-            
+
             // Set bounds to fill the button (leave some padding for border)
             animatedPanel.setBounds(5, 5, width - 10, height - 10);
             animatedPanel.setOpaque(false);
             animatedPanel.setVisible(true);
-            
+
             // Add ONLY the animated panel
             button.add(animatedPanel);
-            
+
             // Bring to front
             button.setComponentZOrder(animatedPanel, 0);
-            
+
             // Store reference for cleanup
             button.putClientProperty("animatedPanel", animatedPanel);
-            
+
             // Force repaint
             button.revalidate();
             button.repaint();
@@ -94,31 +92,32 @@ public class CharacterPick extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    
+
     private void cleanupAnimations() {
         // Stop all animations when window closes
         javax.swing.JToggleButton[] buttons = {
-            charac1, charac2, charac3, charac4, charac5,
-            charac1b, charac2b, charac3b, charac4b, charac5b
+                charac1, charac2, charac3, charac4, charac5,
+                charac1b, charac2b, charac3b, charac4b, charac5b
         };
-        
+
         for (javax.swing.JToggleButton button : buttons) {
-            AnimatedCharacterPanel panel = (AnimatedCharacterPanel) button.getClientProperty("animatedPanel");
-            if (panel != null) {
+            Object property = button.getClientProperty("animatedPanel");
+            if (property instanceof AnimatedCharacterPanel) {
+                AnimatedCharacterPanel panel = (AnimatedCharacterPanel) property;
                 panel.stopAnimation();
             }
         }
     }
-    
+
     @Override
     public void dispose() {
         cleanupAnimations();
         super.dispose();
     }
 
-
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated
+    // Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jLabel3 = new javax.swing.JLabel();
@@ -184,7 +183,9 @@ public class CharacterPick extends javax.swing.JFrame {
 
         pick2.setBackground(new java.awt.Color(0, 153, 153));
         pick2.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\OneDrive\\Pictures\\save.png")); // NOI18N
-        pick2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 255, 255), new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 102), new java.awt.Color(0, 204, 204)));
+        pick2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(153, 255, 255), new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 102),
+                new java.awt.Color(0, 204, 204)));
         pick2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         pick2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -200,14 +201,18 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel14.add(jLabel2);
         jLabel2.setBounds(1430, 40, 165, 48);
 
-        jPanel1.setBackground(new java.awt.Color(0,0, 0,50));
-        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 0, 255), new java.awt.Color(0, 204, 255), new java.awt.Color(255, 51, 0), new java.awt.Color(255, 204, 0)));
+        jPanel1.setBackground(new java.awt.Color(0, 0, 0, 50));
+        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 0, 255), new java.awt.Color(0, 204, 255), new java.awt.Color(255, 51, 0),
+                new java.awt.Color(255, 204, 0)));
         jPanel1.setLayout(null);
 
-        charac1b.setBackground(new java.awt.Color(0,0, 0,50));
+        charac1b.setBackground(new java.awt.Color(0, 0, 0, 50));
         charac1b.setForeground(new java.awt.Color(153, 51, 0));
         charac1b.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\rhinoprof.jpg")); // NOI18N
-        charac1b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0), new java.awt.Color(255, 0, 0)));
+        charac1b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0),
+                new java.awt.Color(255, 0, 0)));
         charac1b.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         charac1b.setMaximumSize(new java.awt.Dimension(140, 330));
         charac1b.setMinimumSize(new java.awt.Dimension(140, 330));
@@ -220,10 +225,12 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel1.add(charac1b);
         charac1b.setBounds(620, 20, 140, 330);
 
-        charac2b.setBackground(new java.awt.Color(0,0, 0,50));
+        charac2b.setBackground(new java.awt.Color(0, 0, 0, 50));
         charac2b.setForeground(new java.awt.Color(153, 51, 0));
         charac2b.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\beheadprof.jpg")); // NOI18N
-        charac2b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0), new java.awt.Color(255, 0, 0)));
+        charac2b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0),
+                new java.awt.Color(255, 0, 0)));
         charac2b.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         charac2b.setMaximumSize(new java.awt.Dimension(140, 330));
         charac2b.setMinimumSize(new java.awt.Dimension(140, 330));
@@ -236,10 +243,12 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel1.add(charac2b);
         charac2b.setBounds(470, 20, 140, 330);
 
-        charac3b.setBackground(new java.awt.Color(0,0, 0,50));
+        charac3b.setBackground(new java.awt.Color(0, 0, 0, 50));
         charac3b.setForeground(new java.awt.Color(153, 51, 0));
         charac3b.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\endprof.jpg")); // NOI18N
-        charac3b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0), new java.awt.Color(255, 0, 0)));
+        charac3b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0),
+                new java.awt.Color(255, 0, 0)));
         charac3b.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         charac3b.setMaximumSize(new java.awt.Dimension(140, 330));
         charac3b.setMinimumSize(new java.awt.Dimension(140, 330));
@@ -252,10 +261,12 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel1.add(charac3b);
         charac3b.setBounds(320, 20, 140, 330);
 
-        charac4b.setBackground(new java.awt.Color(0,0, 0,50));
+        charac4b.setBackground(new java.awt.Color(0, 0, 0, 50));
         charac4b.setForeground(new java.awt.Color(153, 51, 0));
         charac4b.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\pdprof.jpg")); // NOI18N
-        charac4b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0), new java.awt.Color(255, 0, 0)));
+        charac4b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0),
+                new java.awt.Color(255, 0, 0)));
         charac4b.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         charac4b.setMaximumSize(new java.awt.Dimension(140, 330));
         charac4b.setMinimumSize(new java.awt.Dimension(140, 330));
@@ -268,10 +279,12 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel1.add(charac4b);
         charac4b.setBounds(170, 20, 140, 330);
 
-        charac5b.setBackground(new java.awt.Color(0,0, 0,50));
-        charac5b.setForeground(new java.awt.Color(0,0, 0,50));
+        charac5b.setBackground(new java.awt.Color(0, 0, 0, 50));
+        charac5b.setForeground(new java.awt.Color(0, 0, 0, 50));
         charac5b.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\PaladinBG.png")); // NOI18N
-        charac5b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 153, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 153, 0), new java.awt.Color(255, 0, 0)));
+        charac5b.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 153, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 153, 0),
+                new java.awt.Color(255, 0, 0)));
         charac5b.setMaximumSize(new java.awt.Dimension(140, 330));
         charac5b.setMinimumSize(new java.awt.Dimension(140, 330));
         charac5b.setPreferredSize(new java.awt.Dimension(140, 330));
@@ -287,13 +300,17 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel1.setBounds(850, 90, 780, 370);
 
         jPanel2.setBackground(new java.awt.Color(0, 0, 0, 50));
-        jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 204), new java.awt.Color(255, 153, 0), new java.awt.Color(255, 0, 0)));
+        jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 204), new java.awt.Color(255, 153, 0),
+                new java.awt.Color(255, 0, 0)));
         jPanel2.setLayout(null);
 
-        charac1.setBackground(new java.awt.Color(0,0, 0,50));
+        charac1.setBackground(new java.awt.Color(0, 0, 0, 50));
         charac1.setForeground(new java.awt.Color(153, 51, 0));
         charac1.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\rhinoprof.jpg")); // NOI18N
-        charac1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0), new java.awt.Color(255, 0, 0)));
+        charac1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0),
+                new java.awt.Color(255, 0, 0)));
         charac1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         charac1.setMaximumSize(new java.awt.Dimension(140, 330));
         charac1.setMinimumSize(new java.awt.Dimension(140, 330));
@@ -306,10 +323,12 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel2.add(charac1);
         charac1.setBounds(20, 20, 140, 330);
 
-        charac2.setBackground(new java.awt.Color(0,0, 0,50));
+        charac2.setBackground(new java.awt.Color(0, 0, 0, 50));
         charac2.setForeground(new java.awt.Color(153, 51, 0));
         charac2.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\beheadprof.jpg")); // NOI18N
-        charac2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0), new java.awt.Color(255, 0, 0)));
+        charac2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0),
+                new java.awt.Color(255, 0, 0)));
         charac2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         charac2.setMaximumSize(new java.awt.Dimension(140, 330));
         charac2.setMinimumSize(new java.awt.Dimension(140, 330));
@@ -322,10 +341,12 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel2.add(charac2);
         charac2.setBounds(170, 20, 140, 330);
 
-        charac3.setBackground(new java.awt.Color(0,0, 0,50));
+        charac3.setBackground(new java.awt.Color(0, 0, 0, 50));
         charac3.setForeground(new java.awt.Color(153, 51, 0));
         charac3.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\endprof.jpg")); // NOI18N
-        charac3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0), new java.awt.Color(255, 0, 0)));
+        charac3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0),
+                new java.awt.Color(255, 0, 0)));
         charac3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         charac3.setMaximumSize(new java.awt.Dimension(140, 330));
         charac3.setMinimumSize(new java.awt.Dimension(140, 330));
@@ -338,10 +359,12 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel2.add(charac3);
         charac3.setBounds(320, 20, 140, 330);
 
-        charac4.setBackground(new java.awt.Color(0,0, 0,50));
+        charac4.setBackground(new java.awt.Color(0, 0, 0, 50));
         charac4.setForeground(new java.awt.Color(153, 51, 0));
         charac4.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\pdprof.jpg")); // NOI18N
-        charac4.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0), new java.awt.Color(255, 0, 0)));
+        charac4.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 102, 255), new java.awt.Color(204, 0, 0),
+                new java.awt.Color(255, 0, 0)));
         charac4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         charac4.setMaximumSize(new java.awt.Dimension(140, 330));
         charac4.setMinimumSize(new java.awt.Dimension(140, 330));
@@ -354,10 +377,12 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel2.add(charac4);
         charac4.setBounds(470, 20, 140, 330);
 
-        charac5.setBackground(new java.awt.Color(0,0, 0,50));
-        charac5.setForeground(new java.awt.Color(0,0, 0,50));
+        charac5.setBackground(new java.awt.Color(0, 0, 0, 50));
+        charac5.setForeground(new java.awt.Color(0, 0, 0, 50));
         charac5.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\PaladinBG.png")); // NOI18N
-        charac5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 153, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 153, 0), new java.awt.Color(255, 0, 0)));
+        charac5.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 153, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 153, 0),
+                new java.awt.Color(255, 0, 0)));
         charac5.setMaximumSize(new java.awt.Dimension(140, 330));
         charac5.setMinimumSize(new java.awt.Dimension(140, 330));
         charac5.setPreferredSize(new java.awt.Dimension(140, 330));
@@ -380,7 +405,9 @@ public class CharacterPick extends javax.swing.JFrame {
         } else {
             map1.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg2.png")); // Fallback
         }
-        map1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0), new java.awt.Color(255, 0, 0)));
+        map1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0),
+                new java.awt.Color(255, 0, 0)));
         map1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         map1.setMaximumSize(new java.awt.Dimension(285, 155));
         map1.setMinimumSize(new java.awt.Dimension(285, 155));
@@ -402,7 +429,9 @@ public class CharacterPick extends javax.swing.JFrame {
         } else {
             map2.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg3.png")); // Fallback
         }
-        map2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0), new java.awt.Color(255, 0, 0)));
+        map2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0),
+                new java.awt.Color(255, 0, 0)));
         map2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         map2.setMaximumSize(new java.awt.Dimension(285, 155));
         map2.setMinimumSize(new java.awt.Dimension(285, 155));
@@ -424,7 +453,9 @@ public class CharacterPick extends javax.swing.JFrame {
         } else {
             map3.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg4.png")); // Fallback
         }
-        map3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0), new java.awt.Color(255, 0, 0)));
+        map3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0),
+                new java.awt.Color(255, 0, 0)));
         map3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         map3.setMaximumSize(new java.awt.Dimension(285, 155));
         map3.setMinimumSize(new java.awt.Dimension(285, 155));
@@ -445,7 +476,9 @@ public class CharacterPick extends javax.swing.JFrame {
         } else {
             map4.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\Downloads\\bgimg5.png")); // Fallback
         }
-        map4.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0), new java.awt.Color(255, 0, 0)));
+        map4.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED,
+                new java.awt.Color(0, 204, 255), new java.awt.Color(0, 0, 255), new java.awt.Color(255, 204, 0),
+                new java.awt.Color(255, 0, 0)));
         map4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         map4.setMaximumSize(new java.awt.Dimension(285, 155));
         map4.setMinimumSize(new java.awt.Dimension(285, 155));
@@ -458,7 +491,8 @@ public class CharacterPick extends javax.swing.JFrame {
         jPanel14.add(map4);
         map4.setBounds(990, 560, 285, 155);
 
-        jLabel6.setIcon(new javax.swing.ImageIcon("C:\\Users\\user\\OneDrive\\Pictures\\Saved Pictures\\Choose Map.png")); // NOI18N
+        jLabel6.setIcon(
+                new javax.swing.ImageIcon("C:\\Users\\user\\OneDrive\\Pictures\\Saved Pictures\\Choose Map.png")); // NOI18N
         jPanel14.add(jLabel6);
         jLabel6.setBounds(40, 490, 250, 50);
 
@@ -470,22 +504,20 @@ public class CharacterPick extends javax.swing.JFrame {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanel14, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanel14, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void sound(String wav, boolean stop) {
+        try {
 
-    
-    private void sound(String wav, boolean stop){
-        try {                                         
-            
             File zed = new File(wav);
             AudioInputStream audioStream = null;
             try {
@@ -494,127 +526,103 @@ public class CharacterPick extends javax.swing.JFrame {
                 Logger.getLogger(Sounds.class.getName()).log(Level.SEVERE, null, ex);
             }
             Clip c = AudioSystem.getClip();
-            
-            if(stop){
-            c.open(audioStream);
+
+            if (stop) {
+                c.open(audioStream);
                 c.start();
-            }else if (!stop){
-               c.close(); 
+            } else if (!stop) {
+                c.close();
                 c.stop();
             }
-            
-            
+
         } catch (LineUnavailableException | IOException ex) {
             Logger.getLogger(Sounds.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-    
+
     }
-    
-    private void charac1bActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac1bActionPerformed
-       
-        
-       sound("src\\sounds\\test-select.wav", charac1b.isSelected());
-       sound("src\\sounds\\taric_select.wav", charac1b.isSelected());
-       
+
+    private void charac1bActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac1bActionPerformed
+
+        sound("src\\sounds\\test-select.wav", charac1b.isSelected());
+        sound("src\\sounds\\taric_select.wav", charac1b.isSelected());
+
         noPick();
         picked = 1;
         charac5b.setSelected(false);
         charac4b.setSelected(false);
         charac3b.setSelected(false);
         charac2b.setSelected(false);
-    }//GEN-LAST:event_charac1bActionPerformed
+    }// GEN-LAST:event_charac1bActionPerformed
 
-    private void charac2bActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac2bActionPerformed
+    private void charac2bActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac2bActionPerformed
         sound("src\\sounds\\test-select.wav", charac2b.isSelected());
         sound("src\\sounds\\none.wav", charac2b.isSelected());
-        
+
         noPick();
         picked = 2;
         charac5b.setSelected(false);
         charac4b.setSelected(false);
         charac3b.setSelected(false);
         charac1b.setSelected(false);
-    }//GEN-LAST:event_charac2bActionPerformed
+    }// GEN-LAST:event_charac2bActionPerformed
 
-    private void charac3bActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac3bActionPerformed
+    private void charac3bActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac3bActionPerformed
         sound("src\\sounds\\test-select.wav", charac3b.isSelected());
-        sound("src\\sounds\\nautilus_select.wav", charac3b.isSelected() );
-        
+        sound("src\\sounds\\nautilus_select.wav", charac3b.isSelected());
+
         noPick();
         picked = 3;
         charac5b.setSelected(false);
         charac4b.setSelected(false);
         charac1b.setSelected(false);
         charac2b.setSelected(false);
-    }//GEN-LAST:event_charac3bActionPerformed
+    }// GEN-LAST:event_charac3bActionPerformed
 
-    private void charac4bActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac4bActionPerformed
+    private void charac4bActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac4bActionPerformed
         sound("src\\sounds\\test-select.wav", charac4b.isSelected());
         sound("src\\sounds\\zed_select.wav", charac4b.isSelected());
-        
+
         noPick();
         picked = 4;
         charac1b.setSelected(false);
         charac3b.setSelected(false);
         charac2b.setSelected(false);
         charac5b.setSelected(false);
-        }//GEN-LAST:event_charac4bActionPerformed
-   
-    private void noPick(){
-        if (getChosen() == 0 && getPicked() == 0){
-        pick2.setSelected(false);
-        pick2.setBorderPainted( false );
-        pick2.setFocusPainted( false );
-        }else{
-        pick2.setSelected(true);
-        pick2.setBorderPainted( true );
-        pick2.setFocusPainted( true );
+    }// GEN-LAST:event_charac4bActionPerformed
+
+    private void noPick() {
+        if (getChosen() == 0 && getPicked() == 0) {
+            pick2.setSelected(false);
+            pick2.setBorderPainted(false);
+            pick2.setFocusPainted(false);
+        } else {
+            pick2.setSelected(true);
+            pick2.setBorderPainted(true);
+            pick2.setFocusPainted(true);
         }
     }
-    
 
-    private void pick2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pick2ActionPerformed
-         if (getChosen() >= 1 && getPicked() >= 1 && getmapinfo() >= 1){
-             
-             
-             
-        sound("src\\sounds\\ps4-select-button1.wav", true);
-         
-        musicPlayer.play3(false);
-        
-        noPick();
-        int randomnum;
-            Random random = new Random();
-            int min = 1;
-            int max = 3;
-            int randomNumber = random.nextInt(max - min + 1) + min;
-            randomnum = randomNumber;
-                if (randomnum == 1){
-                    Loading1 l1 = new Loading1();
-                    l1.setVisible(true);
-                    l1.setLocationRelativeTo(null);
-                    this.dispose();
-                }
-                if (randomnum == 2){
-                    Loading2 l2 = new Loading2();
-                    l2.setVisible(true);
-                    l2.setLocationRelativeTo(null);
-                    this.dispose();
-                }
-                if (randomnum == 3){
-                    Loading3 l3 = new Loading3();
-                    l3.setVisible(true);
-                    l3.setLocationRelativeTo(null);
-                    this.dispose();
-                }   
-            
-        }else return;
-         
-    }//GEN-LAST:event_pick2ActionPerformed
+    private void pick2ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pick2ActionPerformed
+        if (getChosen() >= 1 && getPicked() >= 1 && getmapinfo() >= 1) {
 
-    private void charac4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac4ActionPerformed
-      sound("src\\sounds\\test-select.wav", charac4.isSelected());
+            sound("src\\sounds\\ps4-select-button1.wav", true);
+
+            musicPlayer.play3(false);
+
+            noPick();
+
+            Loading3 l3 = new Loading3();
+            l3.setVisible(true);
+            l3.setLocationRelativeTo(null);
+            this.dispose();
+
+        } else
+            return;
+
+    }// GEN-LAST:event_pick2ActionPerformed
+
+    private void charac4ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac4ActionPerformed
+        sound("src\\sounds\\test-select.wav", charac4.isSelected());
         sound("src\\sounds\\zed_select.wav", charac4.isSelected());
         noPick();
         chosen = 4;
@@ -622,48 +630,48 @@ public class CharacterPick extends javax.swing.JFrame {
         charac3.setSelected(false);
         charac2.setSelected(false);
         charac1.setSelected(false);
-    }//GEN-LAST:event_charac4ActionPerformed
+    }// GEN-LAST:event_charac4ActionPerformed
 
-    private void charac3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac3ActionPerformed
-     sound("src\\sounds\\test-select.wav", charac3.isSelected());
-        sound("src\\sounds\\nautilus_select.wav", charac3.isSelected() );
-       
+    private void charac3ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac3ActionPerformed
+        sound("src\\sounds\\test-select.wav", charac3.isSelected());
+        sound("src\\sounds\\nautilus_select.wav", charac3.isSelected());
+
         noPick();
         chosen = 3;
         charac5.setSelected(false);
         charac4.setSelected(false);
         charac2.setSelected(false);
         charac1.setSelected(false);
-    }//GEN-LAST:event_charac3ActionPerformed
+    }// GEN-LAST:event_charac3ActionPerformed
 
-    private void charac2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac2ActionPerformed
-       sound("src\\sounds\\test-select.wav", charac2.isSelected());
+    private void charac2ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac2ActionPerformed
+        sound("src\\sounds\\test-select.wav", charac2.isSelected());
         sound("src\\sounds\\none.wav", charac2.isSelected());
-        
+
         noPick();
         chosen = 2;
         charac5.setSelected(false);
         charac4.setSelected(false);
         charac3.setSelected(false);
         charac1.setSelected(false);
-    }//GEN-LAST:event_charac2ActionPerformed
+    }// GEN-LAST:event_charac2ActionPerformed
 
-    private void charac1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac1ActionPerformed
-      sound("src\\sounds\\test-select.wav", charac1.isSelected());
-       sound("src\\sounds\\taric_select.wav", charac1.isSelected());
+    private void charac1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac1ActionPerformed
+        sound("src\\sounds\\test-select.wav", charac1.isSelected());
+        sound("src\\sounds\\taric_select.wav", charac1.isSelected());
         noPick();
         chosen = 1;
         charac5.setSelected(false);
         charac4.setSelected(false);
         charac3.setSelected(false);
         charac2.setSelected(false);
-    }//GEN-LAST:event_charac1ActionPerformed
+    }// GEN-LAST:event_charac1ActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jButton1ActionPerformed
         System.exit(0);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }// GEN-LAST:event_jButton1ActionPerformed
 
-    private void charac5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac5ActionPerformed
+    private void charac5ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac5ActionPerformed
         sound("src\\sounds\\test-select.wav", charac5.isSelected());
         sound("src\\sounds\\omen.wav", charac5.isSelected());
         noPick();
@@ -672,9 +680,9 @@ public class CharacterPick extends javax.swing.JFrame {
         charac4.setSelected(false);
         charac3.setSelected(false);
         charac2.setSelected(false);
-    }//GEN-LAST:event_charac5ActionPerformed
+    }// GEN-LAST:event_charac5ActionPerformed
 
-    private void charac5bActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_charac5bActionPerformed
+    private void charac5bActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_charac5bActionPerformed
         sound("src\\sounds\\test-select.wav", charac5b.isSelected());
         sound("src\\sounds\\omen.wav", charac5b.isSelected());
         noPick();
@@ -683,67 +691,67 @@ public class CharacterPick extends javax.swing.JFrame {
         charac4b.setSelected(false);
         charac3b.setSelected(false);
         charac2b.setSelected(false);
-    }//GEN-LAST:event_charac5bActionPerformed
+    }// GEN-LAST:event_charac5bActionPerformed
 
-    private void map3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_map3ActionPerformed
+    private void map3ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_map3ActionPerformed
         sound("src\\sounds\\test-select.wav", map3.isSelected());
         noPick();
         lvlmap = 3;
         map1.setSelected(false);
         map2.setSelected(false);
         map4.setSelected(false);
-// TODO add your handling code here:
-    }//GEN-LAST:event_map3ActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_map3ActionPerformed
 
-    private void map1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_map1ActionPerformed
+    private void map1ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_map1ActionPerformed
         sound("src\\sounds\\test-select.wav", map1.isSelected());
         noPick();
         lvlmap = 1;
         map3.setSelected(false);
         map2.setSelected(false);
         map4.setSelected(false);
-// TODO add your handling code here:
-    }//GEN-LAST:event_map1ActionPerformed
+        // TODO add your handling code here:
+    }// GEN-LAST:event_map1ActionPerformed
 
-    private void map2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_map2ActionPerformed
+    private void map2ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_map2ActionPerformed
         sound("src\\sounds\\test-select.wav", map2.isSelected());
         noPick();
         lvlmap = 2;
         map1.setSelected(false);
         map3.setSelected(false);
         map4.setSelected(false);
-    }//GEN-LAST:event_map2ActionPerformed
+    }// GEN-LAST:event_map2ActionPerformed
 
-    private void map4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_map4ActionPerformed
+    private void map4ActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_map4ActionPerformed
         sound("src\\sounds\\test-select.wav", map4.isSelected());
         noPick();
         lvlmap = 4;
         map1.setSelected(false);
         map2.setSelected(false);
         map3.setSelected(false);
-    }//GEN-LAST:event_map4ActionPerformed
+    }// GEN-LAST:event_map4ActionPerformed
 
-private static int chosen;
-private static int picked;
-private static int lvlmap;
+    private static int chosen;
+    private static int picked;
+    private static int lvlmap;
 
-public int getmapinfo(){
-    return lvlmap;
-}
+    public int getmapinfo() {
+        return lvlmap;
+    }
 
-public int getPicked() {
-    return picked;
-}
+    public int getPicked() {
+        return picked;
+    }
 
-public int getChosen() {
-    return chosen;
-}
+    public int getChosen() {
+        return chosen;
+    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        
+
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -752,18 +760,22 @@ public int getChosen() {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(CharacterPick.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CharacterPick.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(CharacterPick.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CharacterPick.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(CharacterPick.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CharacterPick.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(CharacterPick.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CharacterPick.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
         }
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-            new CharacterPick().setVisible(true);
+                new CharacterPick().setVisible(true);
             }
         });
     }

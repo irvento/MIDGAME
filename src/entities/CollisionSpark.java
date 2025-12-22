@@ -9,25 +9,25 @@ public class CollisionSpark {
     private BufferedImage sprite;
     private float currentSize;
     private float maxSize;
-    private float growthSpeed = 1.5f; // Faster growth for explosion effect
+    private float growthSpeed = 4.5f; // Much faster growth for explosion effect
     private boolean active = true;
     private int lifetime = 0;
-    private int maxLifetime = 30; // Frames to display (longer for explosion)
-    private float startSize = 2.0f; // Start tiny
-    
+    private int maxLifetime = 25; // Snappier animation
+    private float startSize = 15.0f; // Start immediately visible
+
     public CollisionSpark(float x, float y, BufferedImage sprite) {
         this.x = x;
         this.y = y;
         this.sprite = sprite;
-        this.currentSize = startSize; // Start tiny
-        this.maxSize = 48 * Game.SCALE; // Maximum size (bigger explosion)
+        this.currentSize = startSize;
+        this.maxSize = 150 * Game.SCALE; // Massive explosion size
     }
-    
+
     public void update() {
         try {
             if (active) {
                 lifetime++;
-                
+
                 // Explosion animation: tiny to big
                 if (currentSize < maxSize) {
                     // Accelerating growth for explosion effect
@@ -40,7 +40,7 @@ public class CollisionSpark {
                     // After reaching max size, start shrinking slightly
                     currentSize *= 0.98f;
                 }
-                
+
                 // Deactivate after max lifetime
                 if (lifetime >= maxLifetime) {
                     active = false;
@@ -51,14 +51,14 @@ public class CollisionSpark {
             active = false;
         }
     }
-    
+
     public void draw(Graphics g, int xLvlOffset) {
         try {
             if (active && sprite != null && currentSize > 0 && g != null) {
                 int drawX = (int) (x - currentSize / 2 - xLvlOffset);
                 int drawY = (int) (y - currentSize / 2);
                 int drawSize = (int) currentSize;
-                
+
                 if (drawSize > 0) {
                     g.drawImage(sprite, drawX, drawY, drawSize, drawSize, null);
                 }
@@ -68,13 +68,12 @@ public class CollisionSpark {
             active = false;
         }
     }
-    
+
     public boolean isActive() {
         return active;
     }
-    
+
     public void setActive(boolean active) {
         this.active = active;
     }
 }
-
