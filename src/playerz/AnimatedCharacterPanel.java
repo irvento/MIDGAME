@@ -9,20 +9,26 @@ import utilz.LoadSave;
 import utilz.Constants.PlayerConstants;
 
 public class AnimatedCharacterPanel extends JPanel {
-    private BufferedImage characterImage; // Single static image, no animation
+    private BufferedImage[] animation;
     private int characterId;
+    private int aniTick, aniIndex, aniSpeed = 15;
+    private javax.swing.Timer timer;
 
     public AnimatedCharacterPanel(int characterId) {
         this.characterId = characterId;
         setOpaque(false);
         setVisible(true);
-        loadCharacterImage(); // Load only a single static frame
+        loadAnimations();
+
+        // 120 Tick Rate equivalent (approx 8ms, but for animation 15 is fine)
+        // Using a Swing Timer for animation loop
+        timer = new javax.swing.Timer(16, e -> updateAnimationTick());
+        timer.start();
     }
 
-    private void loadCharacterImage() {
+    private void loadAnimations() {
         BufferedImage spriteSheet = null;
 
-        // Load ONLY the sprite sheet for THIS specific character ID
         switch (characterId) {
             case 1:
                 spriteSheet = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS1);
@@ -39,99 +45,82 @@ public class AnimatedCharacterPanel extends JPanel {
             case 5:
                 spriteSheet = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS5);
                 break;
-            default:
-                // Unknown character ID - create placeholder
-                characterImage = new BufferedImage(64, 40, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2d = characterImage.createGraphics();
-                g2d.setColor(java.awt.Color.GRAY);
-                g2d.fillRect(0, 0, 64, 40);
-                g2d.dispose();
-                return;
         }
 
-        if (spriteSheet == null) {
-            // Create placeholder if sprite not found
-            characterImage = new BufferedImage(64, 40, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = characterImage.createGraphics();
-            g2d.setColor(java.awt.Color.GRAY);
-            g2d.fillRect(0, 0, 64, 40);
-            g2d.dispose();
-            return;
-        }
-
-        // Extract ONLY the first idle frame (static image, no animation)
         int frameWidth = 64;
         int frameHeight = 40;
         int idleRow = PlayerConstants.IDLE;
+        int frames = PlayerConstants.GetSpriteAmount(idleRow);
+
+        animation = new BufferedImage[frames];
 
         try {
-            // Get the first idle frame (column 0, row 0)
-            if (frameWidth <= spriteSheet.getWidth() &&
-                    frameHeight <= spriteSheet.getHeight()) {
-                characterImage = spriteSheet.getSubimage(0, idleRow * frameHeight, frameWidth, frameHeight);
+            if (spriteSheet != null) {
+                for (int i = 0; i < frames; i++) {
+                    animation[i] = spriteSheet.getSubimage(i * frameWidth, idleRow * frameHeight, frameWidth,
+                            frameHeight);
+                }
             } else {
-                // Fallback: use top-left corner
-                characterImage = spriteSheet.getSubimage(0, 0,
-                        Math.min(frameWidth, spriteSheet.getWidth()),
-                        Math.min(frameHeight, spriteSheet.getHeight()));
+                // Fallback placeholder
+                createPlaceholder(frames, frameWidth, frameHeight);
             }
         } catch (Exception e) {
-            // If extraction fails, create placeholder
-            characterImage = new BufferedImage(frameWidth, frameHeight, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = characterImage.createGraphics();
-            g2d.setColor(java.awt.Color.GRAY);
-            g2d.fillRect(0, 0, frameWidth, frameHeight);
+            e.printStackTrace();
+            createPlaceholder(frames, frameWidth, frameHeight);
+        }
+    }
+
+    private void createPlaceholder(int frames, int w, int h) {
+        animation = new BufferedImage[frames];
+        for (int i = 0; i < frames; i++) {
+            animation[i] = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = animation[i].createGraphics();
+            g2d.setColor(i % 2 == 0 ? java.awt.Color.GRAY : java.awt.Color.LIGHT_GRAY);
+            g2d.fillRect(0, 0, w, h);
             g2d.dispose();
+        }
+    }
+
+    private void updateAnimationTick() {
+        aniTick++;
+        if (aniTick >= aniSpeed) {
+            aniTick = 0;
+            aniIndex++;
+            if (aniIndex >= animation.length) {
+                aniIndex = 0;
+            }
+            repaint();
         }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        // Only draw if we have a valid image for THIS character
-        if (characterImage == null) {
+        if (animation == null || animation.length == 0)
             return;
-        }
 
         Graphics2D g2d = (Graphics2D) g;
-        // Use faster rendering hints for better performance
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        // Calculate scaling to fit panel
         int panelWidth = getWidth();
         int panelHeight = getHeight();
+        BufferedImage frame = animation[aniIndex];
 
-        if (panelWidth <= 0 || panelHeight <= 0) {
-            return;
-        }
+        // Scale to fit
+        double scale = Math.min((double) panelWidth / frame.getWidth(), (double) panelHeight / frame.getHeight()) * 0.9;
+        int w = (int) (frame.getWidth() * scale);
+        int h = (int) (frame.getHeight() * scale);
+        int x = (panelWidth - w) / 2;
+        int y = (panelHeight - h) / 2;
 
-        // Scale sprite to fit panel while maintaining aspect ratio
-        int spriteWidth = characterImage.getWidth();
-        int spriteHeight = characterImage.getHeight();
-
-        if (spriteWidth <= 0 || spriteHeight <= 0) {
-            return;
-        }
-
-        double scaleX = (double) panelWidth / spriteWidth;
-        double scaleY = (double) panelHeight / spriteHeight;
-        double scale = Math.min(scaleX, scaleY) * 0.9; // 90% of panel size
-
-        int scaledWidth = (int) (spriteWidth * scale);
-        int scaledHeight = (int) (spriteHeight * scale);
-
-        // Center the sprite
-        int x = (panelWidth - scaledWidth) / 2;
-        int y = (panelHeight - scaledHeight) / 2;
-
-        // Draw ONLY this character's static image (no animation)
-        g2d.drawImage(characterImage, x, y, scaledWidth, scaledHeight, null);
+        g2d.drawImage(frame, x, y, w, h, null);
     }
 
     public void stopAnimation() {
-        // No animation to stop - method kept for compatibility
+        if (timer != null && timer.isRunning()) {
+            timer.stop();
+        }
     }
 }
