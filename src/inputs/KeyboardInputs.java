@@ -64,15 +64,22 @@ public class KeyboardInputs implements KeyListener {
 class deadtask extends TimerTask{
         public void run() {
             try {
-                if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
+                if (gamePanel == null || gamePanel.getGame() == null) {
                     return;
                 }
                 
-                boolean player1daed = gamePanel.getGame().getPlayer1().isdead1();
-                boolean player2daed = gamePanel.getGame().getPlayer2().isdead2();       
+                entities.Player1 p1 = gamePanel.getGame().getPlayer1();
+                entities.Player2 p2 = gamePanel.getGame().getPlayer2();
+                
+                if (p1 == null || p2 == null) {
+                    return;
+                }
+                
+                boolean player1daed = p1.isdead1();
+                boolean player2daed = p2.isdead2();       
                     
-                    gamePanel.getGame().getPlayer1().isdeath2(player2daed);
-                    gamePanel.getGame().getPlayer2().isdeath1(player1daed);
+                p1.isdeath2(player2daed);
+                p2.isdeath1(player1daed);
                     
                     gamePanel.getGame().reset(player1daed, player2daed);
             } catch (Exception e) {
@@ -531,8 +538,8 @@ class UpdateTask extends TimerTask {
                         
                         if (charId == 2) {
                             // Beheaded teleport skill
-                            soundeffects("src\\sounds\\kny-slice.wav");
-                            
+                        soundeffects("src\\sounds\\kny-slice.wav");
+
                             // Teleport in front of enemy
                             gamePanel.getGame().getPlayer1().teleportInFrontOfEnemy(gamePanel.getGame().getPlayer2());
                             
@@ -671,8 +678,8 @@ class UpdateTask extends TimerTask {
                         
                         if (charId == 2) {
                             // Beheaded skill - knockback will happen in UpdateTask when attackbox hits
-                            soundeffects("src\\sounds\\sword_slash.wav");
-                            
+                         soundeffects("src\\sounds\\sword_slash.wav");
+                        
                             // Set flag to enable knockback on hit
                             gamePanel.getGame().getPlayer1().setBeheadedKnockbackReady(true);
                             
@@ -734,8 +741,8 @@ class UpdateTask extends TimerTask {
                         } else {
                             // Normal skill for other characters
                             soundeffects("src\\sounds\\sword_slash.wav");
-                            gamePanel.getGame().getPlayer2().player2getdmg3(true);
-                            gamePanel.getGame().getPlayer1().player1attack3(true);
+                        gamePanel.getGame().getPlayer2().player2getdmg3(true);
+                        gamePanel.getGame().getPlayer1().player1attack3(true);
                         }
                         
                         cKeyPressed = true;
@@ -855,8 +862,8 @@ class UpdateTask extends TimerTask {
                         
                         if (charId2 == 2) {
                             // Beheaded knockback skill for Player 2
-                            soundeffects("src\\sounds\\sword_slash.wav");
-                            
+                       soundeffects("src\\sounds\\sword_slash.wav");
+
                             // Set knockback ready flag and trigger attack
                             gamePanel.getGame().getPlayer2().setBeheadedKnockbackReady(true);
                             gamePanel.getGame().getPlayer2().player2attack3(true);
@@ -916,7 +923,7 @@ class UpdateTask extends TimerTask {
                             // Normal skill for other characters
                             soundeffects("src\\sounds\\sword_slash.wav");
                             gamePanel.getGame().getPlayer1().player1getdmg3(true);
-                            gamePanel.getGame().getPlayer2().player2attack3(true);
+                        gamePanel.getGame().getPlayer2().player2attack3(true);
                         }
                        
                         num3KeyPressed = true;

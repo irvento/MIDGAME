@@ -143,7 +143,7 @@ public class Player1 extends Entity {
         
         public boolean isPoisoned() {
             return isPoisoned;
-        }
+	}
 
         public void render(Graphics g) {
                if (currentHealth <= 0){playerAction = DEAD;
@@ -374,8 +374,8 @@ public class Player1 extends Entity {
         
         public boolean isMovementDisabled() {
             return movementDisabled;
-        }
-        
+	}
+
 	private void updatePos() {
 		moving = false;
                 

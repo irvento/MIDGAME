@@ -158,7 +158,7 @@ public class Player2 extends Entity {
         
         public boolean isPoisoned() {
             return isPoisoned;
-        }
+	}
         
         private void initAttackBox2() {
 		attackBox2 = new Rectangle2D.Float(x, y, (int) (30 * Game.SCALE), (int) (20 * Game.SCALE));
@@ -357,8 +357,8 @@ public class Player2 extends Entity {
         
         public boolean isMovementDisabled() {
             return movementDisabled;
-        }
-        
+	}
+
 	private void updatePos() {
 		moving = false;
                 

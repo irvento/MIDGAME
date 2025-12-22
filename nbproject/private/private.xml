@@ -3,9 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/user/OneDrive/Documents/NetBeansProjects/MIDGAME/src/entities/Entity.java</file>
-            <file>file:/C:/Users/user/OneDrive/Documents/NetBeansProjects/MIDGAME/src/entities/trapp.java</file>
-            <file>file:/C:/Users/user/OneDrive/Documents/NetBeansProjects/MIDGAME/src/main/Game.java</file>
+            <file>file:/C:/Projects/MIDGAME/src/playerz/Loading3.java</file>
+            <file>file:/C:/Projects/MIDGAME/src/main/GameRounds.java</file>
+            <file>file:/C:/Projects/MIDGAME/src/main/GameWindow.java</file>
+            <file>file:/C:/Projects/MIDGAME/src/main/GamePanel.java</file>
+            <file>file:/C:/Projects/MIDGAME/src/main/MusicPlayer.java</file>
+            <file>file:/C:/Projects/MIDGAME/src/main/MainClass.java</file>
+            <file>file:/C:/Projects/MIDGAME/src/playerz/PVP_dashboard.java</file>
         </group>
     </open-files>
 </project-private>

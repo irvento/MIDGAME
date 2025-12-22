@@ -201,49 +201,77 @@ public class Game implements Runnable {
         
         private void resetcords2(){
             if(round2){
+                try {
                 soundeffects("src\\sounds\\round-2-fight.wav");
+                    
+                    // Clear all projectiles and effects before creating new players
+                    player1Hadoukens.clear();
+                    player2Hadoukens.clear();
+                    collisionSparks.clear();
+                    
+                    // Create new player instances
                 player1 = new Player1(325, 150, (int) (64 * SCALE), (int) (40 * SCALE));
                 player1.loadLvlData(levelManager.getCurrentLevel().getLevelData());
-                player1.setGameInstance(this);
+                    player1.setGameInstance(this);
                 
                 player2 = new Player2(1300, 150, (int) (64 * SCALE), (int) (40 * SCALE));
                 player2.loadLvlData2(levelManager.getCurrentLevel().getLevelData());
-                player2.setGameInstance(this);
+                    player2.setGameInstance(this);
+                    
+                    // Reset all state flags
                 killed1 = false;
                 killed2 = false;
                 rr1 = false; 
-                // Clear hadoukens
-                player1Hadoukens.clear();
-                player2Hadoukens.clear();
-                resetHadoukenCooldowns(); 
             
+                    // Reset hadouken cooldowns
+                    resetHadoukenCooldowns();
+                    
+                    // Update round flags
                 round3 = true;
                 round2 = false;
                 round1 = false;
+                } catch (Exception e) {
+                    System.out.println("Error in resetcords2: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }
         private void resetcords3(){
             if(round3){
+                try {
                 soundeffects("src\\sounds\\round-3-fight.wav");
+                    
+                    // Clear all projectiles and effects before creating new players
+                    player1Hadoukens.clear();
+                    player2Hadoukens.clear();
+                    collisionSparks.clear();
+                    
+                    // Create new player instances
             player1 = new Player1(325, 150, (int) (64 * SCALE), (int) (40 * SCALE));
             player1.loadLvlData(levelManager.getCurrentLevel().getLevelData());
-            player1.setGameInstance(this);
+                    player1.setGameInstance(this);
                 
             player2 = new Player2(1300, 150, (int) (64 * SCALE), (int) (40 * SCALE));
             player2.loadLvlData2(levelManager.getCurrentLevel().getLevelData());
-            player2.setGameInstance(this);
+                    player2.setGameInstance(this);
+                    
+                    // Reset all state flags
             killed1 = false;
             killed2 = false;
             rr2 = false;
-            // Clear hadoukens
-            player1Hadoukens.clear();
-            player2Hadoukens.clear();
-            resetHadoukenCooldowns();
             
+                    // Reset hadouken cooldowns
+                    resetHadoukenCooldowns();
+                    
+                    // Update round flags
             round4 = true;
             round3 = false;
             round2 = false;
             round1 = false;
+                } catch (Exception e) {
+                    System.out.println("Error in resetcords3: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }
          
@@ -255,7 +283,7 @@ public class Game implements Runnable {
 	}
 
 	public void update() throws InterruptedException {
-
+            try {
             if(dialog){
                 delaydialog();
             }
@@ -280,13 +308,21 @@ public class Game implements Runnable {
             }
            
                 whowon();
+                
+                // Only update if players are initialized
+                if (player1 != null && player2 != null) {
 		levelManager.update();
 		player1.update();
                 player2.update();
-                updateHadoukens();
-                updateCollisionSparks();
+                    updateHadoukens();
+                    updateCollisionSparks();
+                }
+                
                 resetClasses();
-               
+            } catch (Exception e) {
+                System.out.println("Error in Game.update(): " + e.getMessage());
+                e.printStackTrace();
+            }
 	}
         
         private int play1 = p1.getChosen();

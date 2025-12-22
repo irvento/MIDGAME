@@ -31,7 +31,6 @@ public class MusicPlayer {
         } catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
             System.err.println("Error loading music: " + e.getMessage());
         }
-        
         try {
             File musicFile = new File("src\\sounds\\Lobbytheme.wav");
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(musicFile);
