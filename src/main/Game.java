@@ -16,6 +16,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import util.ObjectPool;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -29,6 +30,8 @@ public class Game implements Runnable {
     private Thread gameThread;
     private final int FPS_SET = 120;
     private final int UPS_SET = 200;
+    // Object pool for Hadouken projectiles
+    private util.ObjectPool<entities.Hadouken> hadoukenPool = new util.ObjectPool<>(() -> new entities.Hadouken(0f, 0f, (int) (40 * SCALE), (int) (40 * SCALE), 1), 30);
     private trapp trap;
     private Player1 player1;
     private Player2 player2;
@@ -209,7 +212,8 @@ public class Game implements Runnable {
             int dir = player1.getFacingDirection();
             float spawnX = player1.getHadoukenSpawnX();
             float spawnY = player1.getHadoukenSpawnY();
-            Hadouken hadouken = new Hadouken(spawnX, spawnY, (int) (40 * SCALE), (int) (40 * SCALE), dir);
+            entities.Hadouken hadouken = hadoukenPool.acquire();
+            hadouken.reset(spawnX, spawnY, dir);
             hadouken.setAnimations(hadoukenAnimations);
             player1Hadoukens.add(hadouken);
             player1.setCanShootHadouken(false);
@@ -221,7 +225,8 @@ public class Game implements Runnable {
             int dir = player2.getFacingDirection();
             float spawnX = player2.getHadoukenSpawnX();
             float spawnY = player2.getHadoukenSpawnY();
-            Hadouken hadouken = new Hadouken(spawnX, spawnY, (int) (40 * SCALE), (int) (40 * SCALE), dir);
+            entities.Hadouken hadouken = hadoukenPool.acquire();
+            hadouken.reset(spawnX, spawnY, dir);
             hadouken.setAnimations(hadoukenAnimations);
             player2Hadoukens.add(hadouken);
             player2.setCanShootHadouken(false);
@@ -765,22 +770,24 @@ public class Game implements Runnable {
 
     private void updateHadoukens() {
         // Update player1 hadoukens
-        Iterator<Hadouken> it1 = player1Hadoukens.iterator();
+        Iterator<entities.Hadouken> it1 = player1Hadoukens.iterator();
         while (it1.hasNext()) {
-            Hadouken h = it1.next();
+            entities.Hadouken h = it1.next();
             h.update();
             if (!h.isActive()) {
                 it1.remove();
+                hadoukenPool.release(h);
             }
         }
 
         // Update player2 hadoukens
-        Iterator<Hadouken> it2 = player2Hadoukens.iterator();
+        Iterator<entities.Hadouken> it2 = player2Hadoukens.iterator();
         while (it2.hasNext()) {
-            Hadouken h = it2.next();
+            entities.Hadouken h = it2.next();
             h.update();
             if (!h.isActive()) {
                 it2.remove();
+                hadoukenPool.release(h);
             }
         }
     }

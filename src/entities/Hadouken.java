@@ -17,6 +17,7 @@ public class Hadouken extends Entity {
     private int flipX = 0;
     private int flipW = 1;
 
+    // Existing constructor remains for initial creation
     public Hadouken(float x, float y, int width, int height, int dir) {
         super(x, y, width, height);
         this.dir = dir;
@@ -96,6 +97,29 @@ public class Hadouken extends Entity {
 
     public Rectangle2D.Float getAttackBox() {
         return attackBox;
+    }
+
+    /**
+     * Reinitialize the projectile for reuse.
+     * @param x new x position
+     * @param y new y position
+     * @param dir direction (1 right, -1 left)
+     */
+    public void reset(float x, float y, int dir) {
+        this.x = x;
+        this.y = y;
+        this.dir = dir;
+        this.active = true;
+        initHitbox(x, y, width, height);
+        initAttackBox();
+        // Update flip based on direction
+        if (dir < 0) {
+            flipX = width;
+            flipW = -1;
+        } else {
+            flipX = 0;
+            flipW = 1;
+        }
     }
 
     public int getDamage() {
