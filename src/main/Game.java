@@ -22,6 +22,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import levels.LevelManager;
 import playerz.CharacterPick;
+import com.studiohartman.jamepad.ControllerManager;
+import com.studiohartman.jamepad.ControllerState;
 
 public class Game implements Runnable {
 
@@ -37,6 +39,7 @@ public class Game implements Runnable {
     private Player2 player2;
     private KeyboardInputs KI;
     private LevelManager levelManager;
+    private ControllerManager controllers;
 
     // Hadouken management
     private ArrayList<Hadouken> player1Hadoukens = new ArrayList<>();
@@ -97,6 +100,15 @@ public class Game implements Runnable {
     }
 
     private void initClasses() {
+        controllers = new ControllerManager();
+        controllers.initSDLGamepad();
+        
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (controllers != null) {
+                controllers.quitSDLGamepad();
+            }
+        }));
+
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
@@ -343,6 +355,40 @@ public class Game implements Runnable {
 
             // Only update if players are initialized
             if (player1 != null && player2 != null) {
+                
+                // Poll controller inputs
+                if (controllers != null) {
+                    controllers.update();
+                    
+                    // Player 1 Controller (Index 0)
+                    ControllerState p1State = controllers.getState(0);
+                    if (p1State.isConnected) {
+                        player1.setLeft(p1State.dpadLeft || p1State.leftStickX < -0.5f);
+                        player1.setRight(p1State.dpadRight || p1State.leftStickX > 0.5f);
+                        player1.setJump(p1State.dpadUp || p1State.a || p1State.leftStickY > 0.5f);
+                        player1.setDefend(p1State.dpadDown || p1State.leftStickY < -0.5f);
+                        
+                        if (p1State.x) player1.executeSkill1(player2);
+                        if (p1State.y) player1.executeSkill2(player2);
+                        if (p1State.b) player1.executeSkill3(player2);
+                        if (p1State.rb) player1.executeHadouken();
+                    }
+
+                    // Player 2 Controller (Index 1)
+                    ControllerState p2State = controllers.getState(1);
+                    if (p2State.isConnected) {
+                        player2.setLeft2(p2State.dpadLeft || p2State.leftStickX < -0.5f);
+                        player2.setRight2(p2State.dpadRight || p2State.leftStickX > 0.5f);
+                        player2.setJump2(p2State.dpadUp || p2State.a || p2State.leftStickY > 0.5f);
+                        player2.setDefend2(p2State.dpadDown || p2State.leftStickY < -0.5f);
+                        
+                        if (p2State.x) player2.executeSkill1(player1);
+                        if (p2State.y) player2.executeSkill2(player1);
+                        if (p2State.b) player2.executeSkill3(player1);
+                        if (p2State.rb) player2.executeHadouken();
+                    }
+                }
+
                 levelManager.update();
                 player1.update();
                 player2.update();
