@@ -41,6 +41,7 @@ public class PVP_dashboard extends JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        settingsButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         playbutton = new javax.swing.JButton();
@@ -128,6 +129,21 @@ public class PVP_dashboard extends JFrame {
         jPanel1.add(jButton2);
         jButton2.setBounds(50, 840, 50, 24);
 
+        settingsButton.setBackground(new java.awt.Color(50, 50, 50));
+        settingsButton.setFont(new java.awt.Font("Yu Gothic", 1, 18));
+        settingsButton.setForeground(new java.awt.Color(255, 255, 255));
+        settingsButton.setText("SETTINGS & CONTROLS");
+        settingsButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(100, 100, 100), new java.awt.Color(150, 150, 150), new java.awt.Color(0, 0, 0), new java.awt.Color(50, 50, 50)));
+        settingsButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        settingsButton.setFocusPainted(false);
+        settingsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                settingsButtonActionPerformed(evt);
+            }
+        });
+        jPanel1.add(settingsButton);
+        settingsButton.setBounds(670, 740, 350, 60);
+
         jLabel7.setFont(new java.awt.Font("Yu Gothic Medium", 1, 14)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(255, 255, 255));
         jLabel7.setText("UNDER_WORLD_LEGENDS");
@@ -181,11 +197,18 @@ public class PVP_dashboard extends JFrame {
         System.exit(0);
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
        Story story = new Story();
        story.setLocationRelativeTo(null);
         story.setVisible(true);
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }
+
+    private void settingsButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        SettingsScreen settings = new SettingsScreen(this);
+        settings.setLocationRelativeTo(null);
+        settings.setVisible(true);
+        this.setVisible(false);
+    }
 
     /**
      * @param args the command line arguments
@@ -237,5 +260,6 @@ public class PVP_dashboard extends JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton playbutton;
-    // End of variables declaration//GEN-END:variables
+    private javax.swing.JButton settingsButton;
+    // End of variables declaration
 }
