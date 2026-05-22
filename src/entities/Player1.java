@@ -626,6 +626,115 @@ public class Player1 extends Entity {
 		
 	}
 
+    private long lastSkill1Time = 0;
+    private long lastSkill2Time = 0;
+    private long lastSkill3Time = 0;
+    private long lastHadoukenTime = 0;
+
+    private final long COOLDOWN_TIME_SKILL1 = 1000;
+    private final long COOLDOWN_TIME_SKILL2 = 3000;
+    private final long COOLDOWN_TIME_SKILL3 = 4500;
+    private final long COOLDOWN_TIME_HADOUKEN = 2000;
+
+    public void executeSkill1(Player2 enemy) {
+        if (System.currentTimeMillis() - lastSkill1Time > COOLDOWN_TIME_SKILL1) {
+            main.Game.soundeffects("src\\sounds\\slice-wtr3.wav");
+            player1attack1(true);
+            
+            // Apply damage if in range
+            if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                enemy.hurt(utilz.Constants.PlayerConstants.damage1(varvalue));
+                enemy.player2getdmg1(true);
+                enemy.checkhit2(true);
+            }
+            
+            lastSkill1Time = System.currentTimeMillis();
+        }
+    }
+
+    public void executeSkill2(Player2 enemy) {
+        if (System.currentTimeMillis() - lastSkill2Time > COOLDOWN_TIME_SKILL2) {
+            int charId = p1.getChosen();
+            main.Game.soundeffects("src\\sounds\\kny-slice.wav");
+            
+            if (charId == 2) {
+                // Beheaded teleport
+                teleportInFrontOfEnemy(enemy);
+                player1attack2(true);
+                if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                    enemy.hurt(3500);
+                    enemy.player2getdmg2(true);
+                    enemy.checkhit2(true);
+                }
+            } else if (charId == 4) {
+                // Plague doctor poison
+                player1attack2(true);
+                if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                    enemy.hurt(utilz.Constants.PlayerConstants.damage2(charId));
+                    enemy.applyPoison();
+                    enemy.player2getdmg2(true);
+                    enemy.checkhit2(true);
+                }
+            } else {
+                // Normal slash
+                player1attack2(true);
+                if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                    enemy.hurt(utilz.Constants.PlayerConstants.damage2(charId));
+                    enemy.player2getdmg2(true);
+                    enemy.checkhit2(true);
+                }
+            }
+            lastSkill2Time = System.currentTimeMillis();
+        }
+    }
+
+    public void executeSkill3(Player2 enemy) {
+        if (System.currentTimeMillis() - lastSkill3Time > COOLDOWN_TIME_SKILL3) {
+            int charId = p1.getChosen();
+            main.Game.soundeffects("src\\sounds\\sword_slash.wav");
+            
+            if (charId == 2) {
+                setBeheadedKnockbackReady(true);
+                player1attack3(true);
+                if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                    enemy.hurt(utilz.Constants.PlayerConstants.damage3(charId));
+                    knockbackEnemy(enemy, (main.Game.GAME_WIDTH / 4.0f) * 0.5f);
+                    enemy.player2getdmg3(true);
+                    enemy.checkhit2(true);
+                    setBeheadedKnockbackReady(false);
+                }
+            } else if (charId == 1) {
+                dashAndPushEnemy(enemy, 100 * Game.SCALE);
+            } else if (charId == 4) {
+                player1attack3(true);
+                if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                    enemy.hurt(utilz.Constants.PlayerConstants.damage3(charId));
+                    enemy.player2getdmg3(true);
+                    enemy.checkhit2(true);
+                }
+                slashAndDashBack(Game.GAME_WIDTH / 8.0f);
+            } else {
+                player1attack3(true);
+                if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                    enemy.hurt(utilz.Constants.PlayerConstants.damage3(charId));
+                    enemy.player2getdmg3(true);
+                    enemy.checkhit2(true);
+                }
+            }
+            lastSkill3Time = System.currentTimeMillis();
+        }
+    }
+
+    public void executeHadouken() {
+        if (System.currentTimeMillis() - lastHadoukenTime > COOLDOWN_TIME_HADOUKEN && canShootHadouken) {
+            main.Game.soundeffects("src\\sounds\\sword_slash.wav");
+            gameInstance.spawnPlayer1Hadouken();
+            setCanShootHadouken(false);
+            lastHadoukenTime = System.currentTimeMillis();
+            canShootHadouken = true; // For immediate reset, or handled in update()
+        }
+    }
+
         // Hadouken methods
         public int getFacingDirection() {
             // Returns 1 for right, -1 for left

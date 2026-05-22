@@ -349,6 +349,14 @@ public class Game implements Runnable {
                 updateHadoukens();
                 checkHadoukenCollisions();
                 updateCollisionSparks();
+                
+                boolean player1daed = player1.isdead1();
+                boolean player2daed = player2.isdead2();
+
+                player1.isdeath2(player2daed);
+                player2.isdeath1(player1daed);
+
+                this.reset(player1daed, player2daed);
             }
 
             resetClasses();
@@ -588,121 +596,75 @@ public class Game implements Runnable {
 
     }
 
+    private long dialogStartTime = 0;
     private void delaydialog() {
         if (dialog) {
-            try {
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        dialog = false;
-
-                    }
-                }, 4000);
-
-            } catch (Exception e) {
+            if (dialogStartTime == 0) dialogStartTime = System.currentTimeMillis();
+            if (System.currentTimeMillis() - dialogStartTime > 4000) {
                 dialog = false;
+                dialogStartTime = 0;
             }
         }
     }
 
+    private long p1WinStartTime = 0;
     private void delayplayer1wins() {
         if (win) {
-            try {
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-
-                        win = false;
-
-                    }
-                }, 10);
-
-            } catch (Exception e) {
+            if (p1WinStartTime == 0) p1WinStartTime = System.currentTimeMillis();
+            if (System.currentTimeMillis() - p1WinStartTime > 10) {
                 win = false;
+                p1WinStartTime = 0;
             }
         }
     }
 
+    private long p2WinStartTime = 0;
     private void delayplayer2wins() {
         if (win) {
-            try {
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-
-                        win = false;
-
-                    }
-                }, 10);
-
-            } catch (Exception e) {
+            if (p2WinStartTime == 0) p2WinStartTime = System.currentTimeMillis();
+            if (System.currentTimeMillis() - p2WinStartTime > 10) {
                 win = false;
+                p2WinStartTime = 0;
             }
         }
     }
 
     // HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
+    private long rr1StartTime = 0;
     private void delay1() {
         if (rr1) {
-            try {
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        rr1 = false;
-
-                    }
-                }, 2500);
-
-            } catch (Exception e) {
+            if (rr1StartTime == 0) rr1StartTime = System.currentTimeMillis();
+            if (System.currentTimeMillis() - rr1StartTime > 2500) {
                 rr1 = false;
-
+                rr1StartTime = 0;
             }
         }
     }
 
+    private long rr2StartTime = 0;
     private void delay2() {
         if (rr2) {
-            try {
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        rr2 = false;
-
-                    }
-                }, 2500);
-
-            } catch (Exception e) {
+            if (rr2StartTime == 0) rr2StartTime = System.currentTimeMillis();
+            if (System.currentTimeMillis() - rr2StartTime > 2500) {
                 rr2 = false;
+                rr2StartTime = 0;
             }
         }
     }
 
+    private long rr3StartTime = 0;
     private void delay3() {
         if (rr3) {
-            try {
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        rr3 = false;
-
-                    }
-                }, 2500);
-
-            } catch (Exception e) {
+            if (rr3StartTime == 0) rr3StartTime = System.currentTimeMillis();
+            if (System.currentTimeMillis() - rr3StartTime > 2500) {
                 rr3 = false;
+                rr3StartTime = 0;
             }
         }
     }
 
-    private static void soundeffects(String path) {
-
+    public static void soundeffects(String path) {
         try {
             File musicPath = new File(path);
             AudioInputStream audio = AudioSystem.getAudioInputStream(musicPath);
