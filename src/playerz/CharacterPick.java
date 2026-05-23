@@ -305,24 +305,34 @@ public class CharacterPick extends JFrame {
         return btn;
     }
 
-    private void playSound(String path) {
-        try {
-            URL url = getClass().getResource(path);
-            if (url == null) {
-                // Try parsing without leading slash if failed, or ensuring it exists
-                if (path.startsWith("/"))
-                    path = path.substring(1);
-                url = getClass().getResource("/" + path);
-            }
-            if (url != null) {
-                AudioInputStream ais = AudioSystem.getAudioInputStream(url);
-                Clip clip = AudioSystem.getClip();
-                clip.open(ais);
-                clip.start();
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to play sound: " + path);
+    private void playSound(final String path) {
+        final String soundPath;
+        if (path.startsWith("/")) {
+            soundPath = path.substring(1);
+        } else {
+            soundPath = path;
         }
+        new Thread(() -> {
+            try {
+                URL url = getClass().getResource("/" + soundPath);
+                if (url == null) {
+                    url = getClass().getResource(soundPath);
+                }
+                if (url != null) {
+                    AudioInputStream ais = AudioSystem.getAudioInputStream(url);
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(ais);
+                    clip.addLineListener(event -> {
+                        if (event.getType() == LineEvent.Type.STOP) {
+                            clip.close();
+                        }
+                    });
+                    clip.start();
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to play sound: " + path);
+            }
+        }).start();
     }
 
     // Getters for Game access if needed (static for now to match old style if
@@ -348,7 +358,7 @@ public class CharacterPick extends JFrame {
         return staticChosenP2;
     }
 
-    public int getmapinfo() {
+    public static int getmapinfo() {
         return staticChosenMap;
     } // Original method name was non-static in file? Let's check view_file.
 

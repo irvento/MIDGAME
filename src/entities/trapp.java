@@ -16,7 +16,6 @@ public class trapp extends Entity{
     private int BGwidth = (int)( 800 * Game.SCALE);
     private int BGheight = (int)(500 * Game.SCALE);
     private  boolean nxtrnd = false;
-    CharacterPick p2 = new CharacterPick();
     
     public trapp(float x, float y, int width, int height) {
         super(x, y, width, height);
@@ -24,13 +23,12 @@ public class trapp extends Entity{
         initHitbox(x, y, 819 * Game.SCALE, 30 * Game.SCALE);
     }
 
-    int map = p2.getmapinfo();
-    
     public void render(Graphics g) {
-                drawHitbox(g);
+        drawHitbox(g);
     }
 
     public void drawBG(Graphics g){
+         int map = CharacterPick.getmapinfo();
          if(map == 1){
                 BgImage1(g);
             } else if(map == 2){

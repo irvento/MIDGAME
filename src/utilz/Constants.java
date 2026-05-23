@@ -53,17 +53,17 @@ public class Constants {
                         public static int maxhealth(int value){
                              switch(value){
                               case 1:
-                                 return 15000;
+                                 return 5000;  // Rhino - tanky
                               case 2:
-                                  return 15500;
+                                  return 4500; // Beheaded - glass cannon
                               case 3:
-                                  return 15000;
+                                  return 4500; // Ender - mid
                               case 4:
-                                  return 14000;
+                                  return 4000; // Plague Doctor - low HP, has poison
                               case 5:
-                                  return 12500;
+                                  return 5500; // Paladin - tanky, has heal
                               default:
-                                   return 0;
+                                   return 4500;
                               }
                         }
                         
@@ -71,17 +71,17 @@ public class Constants {
                         public static int damage1(int value){
                              switch(value){
                               case 1:
-                                 return 125;
+                                 return 350;  // Rhino basic
                               case 2:
-                                  return 145;
+                                  return 400; // Beheaded basic
                               case 3:
-                                  return 155;
+                                  return 380; // Ender basic
                               case 4:
-                                  return 165;
+                                  return 420; // Plague Doc basic
                               case 5:
-                                  return 180;
+                                  return 300; // Paladin basic (lower, has heal)
                               default:
-                                   return 0;
+                                   return 350;
                               }
                         }
                         
@@ -89,34 +89,34 @@ public class Constants {
                         public static int damage2(int value){
                              switch(value){
                               case 1:
-                                 return 145;
+                                 return 600;  // Rhino skill2
                               case 2:
-                                  return 155;
+                                  return 700; // Beheaded skill2
                               case 3:
-                                  return 165;
+                                  return 650; // Ender skill2
                               case 4:
-                                  return 180;
+                                  return 550; // Plague Doc skill2 (also poisons)
                               case 5:
-                                  return 200;
+                                  return 500; // Paladin skill2 (also shields)
                               default:
-                                   return 0;
+                                   return 600;
                               }
                         }
                         
                         public static int damage3(int value){
                              switch(value){
                               case 1:
-                                 return 180;
+                                 return 900;  // Rhino ultimate
                               case 2:
-                                  return 200;
+                                  return 1000; // Beheaded ultimate
                               case 3:
-                                  return 225;
+                                  return 950; // Ender ultimate
                               case 4:
-                                  return 240;
+                                  return 850; // Plague Doc ultimate
                               case 5:
-                                  return 260;
+                                  return 750; // Paladin ultimate (also heals)
                               default:
-                                   return 0;
+                                   return 850;
                               }
                         }
 	}

@@ -12,6 +12,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.JFrame;
 import main.MusicPlayer;
+import playerz.SettingsScreen;
 
 /**
  *

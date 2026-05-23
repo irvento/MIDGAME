@@ -19,7 +19,6 @@ import utilz.LoadSave;
 
 
 public class Player1 extends Entity {
-        CharacterPick p1 = new CharacterPick();
 	private BufferedImage[][] animations;
         private boolean paused = true;
 	private int aniTick, aniIndex, aniSpeed = 25;
@@ -53,7 +52,7 @@ public class Player1 extends Entity {
 	private int healthBarYStart = (int) (34 * Game.SCALE);
 
         
-        private int varvalue = p1.getChosen();  
+        private int varvalue = CharacterPick.getChosen();  
 
     	private int maxHealth = maxhealth(varvalue);
 	public int currentHealth = maxHealth ;
@@ -77,6 +76,24 @@ public class Player1 extends Entity {
         // Beheaded knockback flag
         private boolean beheadedKnockbackReady = false;
         
+        // Ender teleport swap states
+        private boolean isSwapping = false;
+        private long swapTime = 0;
+        public void setSwapping(boolean swap) {
+            this.isSwapping = swap;
+            if (swap) {
+                this.swapTime = System.currentTimeMillis();
+            }
+        }
+        
+        // Paladin shield state variables
+        private boolean isInvincible = false;
+        private long shieldStartTime = 0;
+        private int shieldDuration = 0;
+        public boolean isInvincible() {
+            return isInvincible;
+        }
+        
         
         
         
@@ -96,11 +113,16 @@ public class Player1 extends Entity {
             if (currentHealth <= 0){
                      pauseAnimation();
                      nomoving();
-                }
+                 }
             if (killed2 || finish){
-                    nomoving();
-                }
+                     nomoving();
+                 }
             
+                if (isInvincible) {
+                    if (System.currentTimeMillis() - shieldStartTime > shieldDuration) {
+                        isInvincible = false;
+                    }
+                }
                 
                 updateHealthBar();
                 updateAttackBox();
@@ -145,6 +167,68 @@ public class Player1 extends Entity {
             return isPoisoned;
 	}
 
+        private void drawStatusEffects(Graphics g) {
+            // 1. Poison effect (Green particles/aura)
+            if (isPoisoned) {
+                g.setColor(new java.awt.Color(0, 200, 0, 100)); // Transparent green
+                long time = System.currentTimeMillis();
+                int offset1 = (int)(Math.sin(time / 200.0) * 10);
+                int offset2 = (int)(Math.cos(time / 150.0) * 8);
+                g.fillOval((int)(hitbox.x - 5 + offset1), (int)(hitbox.y + hitbox.height / 2 - 5 + offset2), 12, 12);
+                g.fillOval((int)(hitbox.x + hitbox.width - 5 - offset2), (int)(hitbox.y + 10 + offset1), 10, 10);
+                g.fillOval((int)(hitbox.x + hitbox.width / 2 - 4 + offset2), (int)(hitbox.y + hitbox.height - 12 - offset1), 14, 14);
+            }
+            
+            // 2. Stun / Movement Disabled (Swirling yellow stars/dizzy line above head)
+            if (movementDisabled) {
+                g.setColor(java.awt.Color.YELLOW);
+                long time = System.currentTimeMillis();
+                double angle1 = (time / 150.0);
+                double angle2 = angle1 + Math.PI;
+                int centerX = (int)(hitbox.x + hitbox.width / 2);
+                int centerY = (int)(hitbox.y - 10);
+                int radiusX = 15;
+                int radiusY = 5;
+                
+                int star1X = centerX + (int)(Math.cos(angle1) * radiusX);
+                int star1Y = centerY + (int)(Math.sin(angle1) * radiusY);
+                int star2X = centerX + (int)(Math.cos(angle2) * radiusX);
+                int star2Y = centerY + (int)(Math.sin(angle2) * radiusY);
+                
+                g.fillRect(star1X - 3, star1Y - 3, 6, 6);
+                g.fillRect(star2X - 3, star2Y - 3, 6, 6);
+                
+                g.setColor(new java.awt.Color(255, 255, 0, 80));
+                g.drawOval(centerX - radiusX, centerY - radiusY, radiusX * 2, radiusY * 2);
+            }
+            
+            // 3. Paladin Holy Shield (Glowing golden circular boundary)
+            if (isInvincible) {
+                g.setColor(new java.awt.Color(255, 204, 51, 120)); // Semi-transparent Gold
+                int shieldSize = (int)(Math.max(hitbox.width, hitbox.height) * 1.3);
+                int shieldX = (int)(hitbox.x + hitbox.width / 2 - shieldSize / 2);
+                int shieldY = (int)(hitbox.y + hitbox.height / 2 - shieldSize / 2);
+                g.drawOval(shieldX, shieldY, shieldSize, shieldSize);
+                g.setColor(new java.awt.Color(255, 255, 150, 40));
+                g.fillOval(shieldX, shieldY, shieldSize, shieldSize);
+            }
+            
+            // 4. Void Swap Purple particle burst
+            if (isSwapping) {
+                long elapsed = System.currentTimeMillis() - swapTime;
+                if (elapsed < 500) {
+                    g.setColor(new java.awt.Color(153, 51, 255, (int)(255 * (1.0 - elapsed / 500.0)))); // Fading purple
+                    int burstSize = (int)(20 + (elapsed / 500.0) * 60);
+                    int bx = (int)(hitbox.x + hitbox.width / 2 - burstSize / 2);
+                    int by = (int)(hitbox.y + hitbox.height / 2 - burstSize / 2);
+                    g.drawOval(bx, by, burstSize, burstSize);
+                    g.drawRect(bx + 4, by + 4, burstSize - 8, burstSize - 8);
+                } else {
+                    isSwapping = false;
+                }
+            }
+        }
+
         public void render(Graphics g) {
                if (currentHealth <= 0){playerAction = DEAD;
                
@@ -152,6 +236,7 @@ public class Player1 extends Entity {
                }
             
 		g.drawImage(animations[playerAction][aniIndex], (int) (hitbox.x - xDrawOffset) + flipX, (int) (hitbox.y - yDrawOffset), width * flipW, height, null);
+                drawStatusEffects(g);
                 drawUI(g);
 	}
         
@@ -168,16 +253,21 @@ public class Player1 extends Entity {
                 
         public void hurt(int amount) {
             try {
-            int startAni = playerAction;
+                if (isInvincible) {
+                    return; // Ignore damage when Paladin's shield is active
+                }
+                if (defend) {
+                    amount = amount / 3; // Blocking reduces damage to 1/3
+                }
 		currentHealth -= amount;
                 
                 // Spawn collision spark at random location within hitbox
                 spawnCollisionSpark();
                 
 		if (currentHealth <= 0){
-			startAni = DEAD;
+			playerAction = DEAD;
                 } else {
-                        startAni = HURT;
+                        playerAction = HURT;
                 }
             } catch (Exception e) {
                 // Silently handle errors to prevent crashes
@@ -223,7 +313,7 @@ public class Player1 extends Entity {
 		healthHeight = (int) ((currentHealth / (float) maxHealth) * healthBarHeight);
 	}
         
-        private void updateAttackBox() {
+        public void updateAttackBox() {
 		if (right)
 			attackBox1.x = hitbox.x + hitbox.width + (int) (Game.SCALE * 10);
 		else if (left)
@@ -340,7 +430,7 @@ public class Player1 extends Entity {
         
         
         
-        int varvalues = p1.getPicked();
+        int varvalues = CharacterPick.getPicked();
         public void getdmgs1(){
              if(getdmg1 == true && checkplayerhit1 == true){
                    hurt(damage1(varvalues));
@@ -456,7 +546,7 @@ public class Player1 extends Entity {
 	private void loadAnimations() { 
 
 
-         int varvalue = p1.getChosen();  
+          int varvalue = CharacterPick.getChosen();  
           if (varvalue == 1) {  
             png = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS1); 
          }else if (varvalue == 2){  
@@ -631,10 +721,10 @@ public class Player1 extends Entity {
     private long lastSkill3Time = 0;
     private long lastHadoukenTime = 0;
 
-    private final long COOLDOWN_TIME_SKILL1 = 1000;
-    private final long COOLDOWN_TIME_SKILL2 = 3000;
-    private final long COOLDOWN_TIME_SKILL3 = 4500;
-    private final long COOLDOWN_TIME_HADOUKEN = 2000;
+    private final long COOLDOWN_TIME_SKILL1 = 600;
+    private final long COOLDOWN_TIME_SKILL2 = 2000;
+    private final long COOLDOWN_TIME_SKILL3 = 3500;
+    private final long COOLDOWN_TIME_HADOUKEN = 1500;
 
     public void executeSkill1(Player2 enemy) {
         if (System.currentTimeMillis() - lastSkill1Time > COOLDOWN_TIME_SKILL1) {
@@ -654,7 +744,7 @@ public class Player1 extends Entity {
 
     public void executeSkill2(Player2 enemy) {
         if (System.currentTimeMillis() - lastSkill2Time > COOLDOWN_TIME_SKILL2) {
-            int charId = p1.getChosen();
+            int charId = CharacterPick.getChosen();
             main.Game.soundeffects("src\\sounds\\kny-slice.wav");
             
             if (charId == 2) {
@@ -662,16 +752,35 @@ public class Player1 extends Entity {
                 teleportInFrontOfEnemy(enemy);
                 player1attack2(true);
                 if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
-                    enemy.hurt(3500);
+                    enemy.hurt(800);
                     enemy.player2getdmg2(true);
                     enemy.checkhit2(true);
                 }
+            } else if (charId == 3) {
+                // Ender Void Swap
+                swapPositions(enemy);
+                player1attack2(true);
+                enemy.hurt(800);
+                enemy.player2getdmg2(true);
+                enemy.checkhit2(true);
             } else if (charId == 4) {
                 // Plague doctor poison
                 player1attack2(true);
                 if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
                     enemy.hurt(utilz.Constants.PlayerConstants.damage2(charId));
                     enemy.applyPoison();
+                    enemy.player2getdmg2(true);
+                    enemy.checkhit2(true);
+                }
+            } else if (charId == 5) {
+                // Paladin Holy Shield (Invincibility & push back nearby enemies)
+                player1attack2(true);
+                isInvincible = true;
+                shieldStartTime = System.currentTimeMillis();
+                shieldDuration = 1500; // 1.5 seconds holy shield
+                if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                    enemy.hurt(600);
+                    knockbackEnemy(enemy, 50 * Game.SCALE);
                     enemy.player2getdmg2(true);
                     enemy.checkhit2(true);
                 }
@@ -690,7 +799,7 @@ public class Player1 extends Entity {
 
     public void executeSkill3(Player2 enemy) {
         if (System.currentTimeMillis() - lastSkill3Time > COOLDOWN_TIME_SKILL3) {
-            int charId = p1.getChosen();
+            int charId = CharacterPick.getChosen();
             main.Game.soundeffects("src\\sounds\\sword_slash.wav");
             
             if (charId == 2) {
@@ -705,6 +814,25 @@ public class Player1 extends Entity {
                 }
             } else if (charId == 1) {
                 dashAndPushEnemy(enemy, 100 * Game.SCALE);
+            } else if (charId == 3) {
+                // Ender Void Pull & Stun
+                player1attack3(true);
+                pullEnemy(enemy);
+                enemy.hurt(utilz.Constants.PlayerConstants.damage3(charId));
+                enemy.player2getdmg3(true);
+                enemy.checkhit2(true);
+                enemy.setMovementDisabled(true);
+                Timer disableTimer = new Timer();
+                disableTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (enemy != null) {
+                                enemy.setMovementDisabled(false);
+                            }
+                        } catch (Exception e) {}
+                    }
+                }, 1200);
             } else if (charId == 4) {
                 player1attack3(true);
                 if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
@@ -713,6 +841,18 @@ public class Player1 extends Entity {
                     enemy.checkhit2(true);
                 }
                 slashAndDashBack(Game.GAME_WIDTH / 8.0f);
+            } else if (charId == 5) {
+                // Paladin Holy Strike & Heal 2000 HP
+                player1attack3(true);
+                if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
+                    enemy.hurt(utilz.Constants.PlayerConstants.damage3(charId));
+                    enemy.player2getdmg3(true);
+                    enemy.checkhit2(true);
+                }
+                currentHealth += 800;
+                if (currentHealth > maxHealth) {
+                    currentHealth = maxHealth;
+                }
             } else {
                 player1attack3(true);
                 if (attackBox1 != null && enemy.getHitbox() != null && attackBox1.intersects(enemy.getHitbox())) {
@@ -729,9 +869,7 @@ public class Player1 extends Entity {
         if (System.currentTimeMillis() - lastHadoukenTime > COOLDOWN_TIME_HADOUKEN && canShootHadouken) {
             main.Game.soundeffects("src\\sounds\\sword_slash.wav");
             gameInstance.spawnPlayer1Hadouken();
-            setCanShootHadouken(false);
             lastHadoukenTime = System.currentTimeMillis();
-            canShootHadouken = true; // For immediate reset, or handled in update()
         }
     }
 
@@ -813,6 +951,44 @@ public class Player1 extends Entity {
             
             // Update attackbox immediately after teleport
             updateAttackBox();
+        }
+
+        public void swapPositions(Player2 enemy) {
+            if (enemy == null) return;
+            float myX = hitbox.x;
+            float myY = hitbox.y;
+            
+            hitbox.x = enemy.getHitbox().x;
+            hitbox.y = enemy.getHitbox().y;
+            x = hitbox.x;
+            y = hitbox.y;
+            
+            enemy.getHitbox().x = myX;
+            enemy.getHitbox().y = myY;
+            enemy.x = myX;
+            enemy.y = myY;
+            
+            setSwapping(true);
+            enemy.setSwapping(true);
+            
+            updateAttackBox();
+            enemy.updateAttackBox();
+        }
+        
+        public void pullEnemy(Player2 enemy) {
+            if (enemy == null) return;
+            float pullX;
+            if (hitbox.x < enemy.getHitbox().x) {
+                pullX = hitbox.x + hitbox.width + (15 * Game.SCALE);
+            } else {
+                pullX = hitbox.x - enemy.getHitbox().width - (15 * Game.SCALE);
+            }
+            
+            pullX = Math.max(0, Math.min(pullX, Game.GAME_WIDTH - enemy.getHitbox().width));
+            enemy.getHitbox().x = pullX;
+            enemy.x = pullX;
+            
+            enemy.updateAttackBox();
         }
         
         public void updateAttackBoxAfterTeleport() {

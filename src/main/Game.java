@@ -16,7 +16,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import util.ObjectPool;
+import utilz.ObjectPool;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -33,7 +33,7 @@ public class Game implements Runnable {
     private final int FPS_SET = 120;
     private final int UPS_SET = 200;
     // Object pool for Hadouken projectiles
-    private util.ObjectPool<entities.Hadouken> hadoukenPool = new util.ObjectPool<>(() -> new entities.Hadouken(0f, 0f, (int) (40 * SCALE), (int) (40 * SCALE), 1), 30);
+    private utilz.ObjectPool<entities.Hadouken> hadoukenPool = new utilz.ObjectPool<>(() -> new entities.Hadouken(0f, 0f, (int) (40 * SCALE), (int) (40 * SCALE), 1), 30);
     private trapp trap;
     private Player1 player1;
     private Player2 player2;
@@ -70,10 +70,9 @@ public class Game implements Runnable {
 
     private MusicPlayer sound;
     private MusicPlayer musicPlayer = new MusicPlayer();
-    private CharacterPick p1 = new CharacterPick();
 
     public Game() {
-        System.out.println("mapa " + p1.getmapinfo());
+        System.out.println("mapa " + CharacterPick.getmapinfo());
         initClasses();
 
         gamePanel = new GamePanel(this);
@@ -100,14 +99,19 @@ public class Game implements Runnable {
     }
 
     private void initClasses() {
-        controllers = new ControllerManager();
-        controllers.initSDLGamepad();
-        
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (controllers != null) {
-                controllers.quitSDLGamepad();
-            }
-        }));
+        try {
+            controllers = new ControllerManager();
+            controllers.initSDLGamepad();
+            
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (controllers != null) {
+                    controllers.quitSDLGamepad();
+                }
+            }));
+        } catch (Throwable t) {
+            System.out.println("Gamepad support unavailable: " + t.getMessage());
+            controllers = null;
+        }
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -358,34 +362,39 @@ public class Game implements Runnable {
                 
                 // Poll controller inputs
                 if (controllers != null) {
-                    controllers.update();
-                    
-                    // Player 1 Controller (Index 0)
-                    ControllerState p1State = controllers.getState(0);
-                    if (p1State.isConnected) {
-                        player1.setLeft(p1State.dpadLeft || p1State.leftStickX < -0.5f);
-                        player1.setRight(p1State.dpadRight || p1State.leftStickX > 0.5f);
-                        player1.setJump(p1State.dpadUp || p1State.a || p1State.leftStickY > 0.5f);
-                        player1.setDefend(p1State.dpadDown || p1State.leftStickY < -0.5f);
+                    try {
+                        controllers.update();
                         
-                        if (p1State.x) player1.executeSkill1(player2);
-                        if (p1State.y) player1.executeSkill2(player2);
-                        if (p1State.b) player1.executeSkill3(player2);
-                        if (p1State.rb) player1.executeHadouken();
-                    }
+                        // Player 1 Controller (Index 0)
+                        ControllerState p1State = controllers.getState(0);
+                        if (p1State.isConnected) {
+                            player1.setLeft(p1State.dpadLeft || p1State.leftStickX < -0.5f);
+                            player1.setRight(p1State.dpadRight || p1State.leftStickX > 0.5f);
+                            player1.setJump(p1State.dpadUp || p1State.a || p1State.leftStickY > 0.5f);
+                            player1.setDefend(p1State.dpadDown || p1State.leftStickY < -0.5f);
+                            
+                            if (p1State.x) player1.executeSkill1(player2);
+                            if (p1State.y) player1.executeSkill2(player2);
+                            if (p1State.b) player1.executeSkill3(player2);
+                            if (p1State.rb) player1.executeHadouken();
+                        }
 
-                    // Player 2 Controller (Index 1)
-                    ControllerState p2State = controllers.getState(1);
-                    if (p2State.isConnected) {
-                        player2.setLeft2(p2State.dpadLeft || p2State.leftStickX < -0.5f);
-                        player2.setRight2(p2State.dpadRight || p2State.leftStickX > 0.5f);
-                        player2.setJump2(p2State.dpadUp || p2State.a || p2State.leftStickY > 0.5f);
-                        player2.setDefend2(p2State.dpadDown || p2State.leftStickY < -0.5f);
-                        
-                        if (p2State.x) player2.executeSkill1(player1);
-                        if (p2State.y) player2.executeSkill2(player1);
-                        if (p2State.b) player2.executeSkill3(player1);
-                        if (p2State.rb) player2.executeHadouken();
+                        // Player 2 Controller (Index 1)
+                        ControllerState p2State = controllers.getState(1);
+                        if (p2State.isConnected) {
+                            player2.setLeft2(p2State.dpadLeft || p2State.leftStickX < -0.5f);
+                            player2.setRight2(p2State.dpadRight || p2State.leftStickX > 0.5f);
+                            player2.setJump2(p2State.dpadUp || p2State.a || p2State.leftStickY > 0.5f);
+                            player2.setDefend2(p2State.dpadDown || p2State.leftStickY < -0.5f);
+                            
+                            if (p2State.x) player2.executeSkill1(player1);
+                            if (p2State.y) player2.executeSkill2(player1);
+                            if (p2State.b) player2.executeSkill3(player1);
+                            if (p2State.rb) player2.executeHadouken();
+                        }
+                    } catch (Throwable t) {
+                        // Disable controllers on error
+                        controllers = null;
                     }
                 }
 
@@ -412,8 +421,8 @@ public class Game implements Runnable {
         }
     }
 
-    private int play1 = p1.getChosen();
-    private int play2 = p1.getPicked();
+    private int play1 = CharacterPick.getChosen();
+    private int play2 = CharacterPick.getPicked();
 
     public void render(Graphics g) {
 

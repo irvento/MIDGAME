@@ -12,7 +12,6 @@ public class LevelManager {
 	private Game game;
 	private BufferedImage[] levelSprite;
 	private Level levelOne;
-        private CharacterPick p1 = new CharacterPick();
         
         
 	public LevelManager(Game game) {
@@ -22,9 +21,9 @@ public class LevelManager {
 	}
         
         private BufferedImage img = null;
-        private int map = p1.getmapinfo();
         
 	private void importOutsideSprites() {
+            int map = CharacterPick.getmapinfo();
             if(map == 1){
                 img = LoadSave.GetSpriteAtlas(LoadSave.LEVEL_ATLAS1);
             } else if(map == 2){

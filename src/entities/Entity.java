@@ -10,7 +10,6 @@ public abstract class Entity {
 	protected float x, y;
 	protected int width, height;
 	protected Rectangle2D.Float hitbox;
-        CharacterPick p1 = new CharacterPick();
 
 	public Entity(float x, float y, int width, int height) {
 		this.x = x;
@@ -20,9 +19,9 @@ public abstract class Entity {
 
 
 	}
-        int map = p1.getmapinfo();
         String color;
         protected void drawHitbox(Graphics g) {
+             int map = CharacterPick.getmapinfo();
              if(map == 1){
                  g.setColor(Color.orange);
             } else if(map == 2){
