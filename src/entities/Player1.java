@@ -130,7 +130,6 @@ public class Player1 extends Entity {
 		updatePos();
 		updateAnimationTick();
 		setAnimation();
-                getdmgs1();
                 updatePoison(); // Update poison damage over time
 	}
         

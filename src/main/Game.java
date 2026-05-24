@@ -405,6 +405,16 @@ public class Game implements Runnable {
                 checkHadoukenCollisions();
                 updateCollisionSparks();
                 
+                // Trap collision checks
+                if (trap != null) {
+                    if (player1.getHitbox().intersects(trap.getHitbox())) {
+                        player1.hurt(100000); // Instant death
+                    }
+                    if (player2.getHitbox().intersects(trap.getHitbox())) {
+                        player2.hurt(100000); // Instant death
+                    }
+                }
+                
                 boolean player1daed = player1.isdead1();
                 boolean player2daed = player2.isdead2();
 
