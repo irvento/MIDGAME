@@ -9,10 +9,15 @@ import utilz.LoadSave;
 import utilz.Constants.PlayerConstants;
 
 public class AnimatedCharacterPanel extends JPanel {
-    private BufferedImage[] animation;
+    private BufferedImage[] idleAnimation;
+    private BufferedImage[] hoverAnimation;
     private int characterId;
     private int aniTick, aniIndex, aniSpeed = 15;
     private javax.swing.Timer timer;
+    private boolean isHovered = false;
+    private boolean isSelected = false;
+    private double currentScaleMultiplier = 1.0;
+    private double targetScaleMultiplier = 1.0;
 
     public AnimatedCharacterPanel(int characterId) {
         this.characterId = characterId;
@@ -20,10 +25,22 @@ public class AnimatedCharacterPanel extends JPanel {
         setVisible(true);
         loadAnimations();
 
-        // 120 Tick Rate equivalent (approx 8ms, but for animation 15 is fine)
-        // Using a Swing Timer for animation loop
+        // 120 Tick Rate equivalent
         timer = new javax.swing.Timer(16, e -> updateAnimationTick());
         timer.start();
+    }
+    
+    public void setHovered(boolean hovered) {
+        this.isHovered = hovered;
+        this.targetScaleMultiplier = (hovered || isSelected) ? 1.2 : 1.0;
+        if (!hovered && aniIndex >= idleAnimation.length) {
+            aniIndex = 0;
+        }
+    }
+    
+    public void setSelected(boolean selected) {
+        this.isSelected = selected;
+        this.targetScaleMultiplier = (isHovered || isSelected) ? 1.2 : 1.0;
     }
 
     private void loadAnimations() {
@@ -49,35 +66,41 @@ public class AnimatedCharacterPanel extends JPanel {
 
         int frameWidth = 64;
         int frameHeight = 40;
+        
         int idleRow = PlayerConstants.IDLE;
-        int frames = PlayerConstants.GetSpriteAmount(idleRow);
+        int idleFrames = PlayerConstants.GetSpriteAmount(idleRow);
+        
+        int hoverRow = PlayerConstants.RUNNING;
+        int hoverFrames = PlayerConstants.GetSpriteAmount(hoverRow);
 
-        animation = new BufferedImage[frames];
+        idleAnimation = new BufferedImage[idleFrames];
+        hoverAnimation = new BufferedImage[hoverFrames];
 
         try {
             if (spriteSheet != null) {
-                for (int i = 0; i < frames; i++) {
-                    animation[i] = spriteSheet.getSubimage(i * frameWidth, idleRow * frameHeight, frameWidth,
-                            frameHeight);
+                for (int i = 0; i < idleFrames; i++) {
+                    idleAnimation[i] = spriteSheet.getSubimage(i * frameWidth, idleRow * frameHeight, frameWidth, frameHeight);
+                }
+                for (int i = 0; i < hoverFrames; i++) {
+                    hoverAnimation[i] = spriteSheet.getSubimage(i * frameWidth, hoverRow * frameHeight, frameWidth, frameHeight);
                 }
             } else {
-                // Fallback placeholder
-                createPlaceholder(frames, frameWidth, frameHeight);
+                createPlaceholder(idleFrames, hoverFrames, frameWidth, frameHeight);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            createPlaceholder(frames, frameWidth, frameHeight);
+            createPlaceholder(idleFrames, hoverFrames, frameWidth, frameHeight);
         }
     }
 
-    private void createPlaceholder(int frames, int w, int h) {
-        animation = new BufferedImage[frames];
-        for (int i = 0; i < frames; i++) {
-            animation[i] = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = animation[i].createGraphics();
-            g2d.setColor(i % 2 == 0 ? java.awt.Color.GRAY : java.awt.Color.LIGHT_GRAY);
-            g2d.fillRect(0, 0, w, h);
-            g2d.dispose();
+    private void createPlaceholder(int idleF, int hoverF, int w, int h) {
+        idleAnimation = new BufferedImage[idleF];
+        for (int i = 0; i < idleF; i++) {
+            idleAnimation[i] = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        }
+        hoverAnimation = new BufferedImage[hoverF];
+        for (int i = 0; i < hoverF; i++) {
+            hoverAnimation[i] = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         }
     }
 
@@ -86,30 +109,47 @@ public class AnimatedCharacterPanel extends JPanel {
         if (aniTick >= aniSpeed) {
             aniTick = 0;
             aniIndex++;
-            if (aniIndex >= animation.length) {
+            BufferedImage[] currentAnim = (isHovered || isSelected) ? hoverAnimation : idleAnimation;
+            if (currentAnim != null && aniIndex >= currentAnim.length) {
                 aniIndex = 0;
             }
-            repaint();
         }
+        
+        // Smooth scaling interpolation
+        currentScaleMultiplier += (targetScaleMultiplier - currentScaleMultiplier) * 0.15;
+        
+        repaint();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (animation == null || animation.length == 0)
-            return;
+        BufferedImage[] currentAnim = (isHovered || isSelected) ? hoverAnimation : idleAnimation;
+        if (currentAnim == null || currentAnim.length == 0) return;
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int panelWidth = getWidth();
         int panelHeight = getHeight();
-        BufferedImage frame = animation[aniIndex];
+        
+        if (isSelected) {
+            // Draw glowing background if selected
+            g2d.setColor(new java.awt.Color(255, 255, 255, 40));
+            g2d.fillRoundRect(5, 5, panelWidth - 10, panelHeight - 10, 20, 20);
+        } else if (isHovered) {
+            g2d.setColor(new java.awt.Color(255, 255, 255, 20));
+            g2d.fillRoundRect(5, 5, panelWidth - 10, panelHeight - 10, 20, 20);
+        }
 
-        // Scale to fit
-        double scale = Math.min((double) panelWidth / frame.getWidth(), (double) panelHeight / frame.getHeight()) * 0.9;
+        // Make sure aniIndex is within bounds for current animation
+        int safeIndex = aniIndex % currentAnim.length;
+        BufferedImage frame = currentAnim[safeIndex];
+
+        // Scale to fit with multiplier
+        double scale = Math.min((double) panelWidth / frame.getWidth(), (double) panelHeight / frame.getHeight()) * 0.9 * currentScaleMultiplier;
         int w = (int) (frame.getWidth() * scale);
         int h = (int) (frame.getHeight() * scale);
         int x = (panelWidth - w) / 2;

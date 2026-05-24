@@ -100,13 +100,23 @@ public class CharacterPick extends JFrame {
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 50, 30, 50));
 
         // Map Selection
-        JPanel mapsContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        JPanel mapsContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(new Color(15, 15, 20, 200));
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+                g2d.setColor(new Color(100, 100, 100, 100));
+                g2d.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 30, 30);
+            }
+        };
         mapsContainer.setOpaque(false);
-        mapsContainer.setBorder(BorderFactory.createTitledBorder(null, "SELECT MAP",
+        mapsContainer.setBorder(BorderFactory.createTitledBorder(null, "SELECT ARENA",
                 javax.swing.border.TitledBorder.CENTER,
                 javax.swing.border.TitledBorder.TOP,
-                new Font("Yu Gothic UI Semibold", Font.BOLD, 18),
-                Color.WHITE));
+                new Font("SansSerif", Font.BOLD, 18),
+                new Color(220, 220, 220)));
 
         addMapOption(mapsContainer, LoadSave.BGIMG1, 1);
         addMapOption(mapsContainer, LoadSave.BGIMG2, 2);
@@ -120,9 +130,10 @@ public class CharacterPick extends JFrame {
         actionPanel.setOpaque(false);
         playButton = createButton("START GAME");
         playButton.setEnabled(false); // Disabled until ready
-        playButton.setPreferredSize(new Dimension(200, 50));
-        playButton.setBackground(new Color(0, 153, 153));
-        playButton.setForeground(Color.WHITE);
+        playButton.setPreferredSize(new Dimension(250, 60));
+        playButton.setBackground(new Color(50, 50, 50));
+        playButton.setForeground(Color.GRAY);
+        playButton.setFont(new Font("SansSerif", Font.BOLD, 22));
         playButton.addActionListener(e -> startGame());
 
         actionPanel.add(playButton);
@@ -132,17 +143,30 @@ public class CharacterPick extends JFrame {
     }
 
     private JPanel createPlayerSection(String title, int playerNum) {
-        JPanel panel = new JPanel(new BorderLayout(0, 20));
-        panel.setBackground(new Color(0, 0, 0, 150)); // Semi-transparent black
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0, 204, 255), 2),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)));
+        JPanel panel = new JPanel(new BorderLayout(0, 20)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // Draw dark translucent background
+                g2d.setColor(new Color(15, 15, 20, 200));
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+                
+                // Draw sleek glowing border
+                Color glowColor = playerNum == 1 ? new Color(0, 200, 255, 150) : new Color(255, 50, 50, 150);
+                g2d.setColor(glowColor);
+                g2d.setStroke(new BasicStroke(3f));
+                g2d.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 30, 30);
+            }
+        };
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
         // Title
         JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 32));
-        titleLabel.setForeground(playerNum == 1 ? new Color(100, 200, 255) : new Color(255, 100, 100)); // Blue vs Red
-                                                                                                        // tint
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 36));
+        titleLabel.setForeground(playerNum == 1 ? new Color(100, 220, 255) : new Color(255, 100, 100)); // Blue vs Red tint
+        
         panel.add(titleLabel, BorderLayout.NORTH);
 
         // Character Grid
@@ -182,7 +206,7 @@ public class CharacterPick extends JFrame {
         JToggleButton btn = new JToggleButton();
         btn.setPreferredSize(new Dimension(100, 250)); // Tall buttons
         btn.setLayout(new BorderLayout());
-        btn.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+        btn.setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50), 2));
         btn.setContentAreaFilled(false);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -190,6 +214,25 @@ public class CharacterPick extends JFrame {
         // Add Animation Panel
         AnimatedCharacterPanel aniPanel = new AnimatedCharacterPanel(charId);
         btn.add(aniPanel, BorderLayout.CENTER);
+
+        // Hover & Selection Logic
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                aniPanel.setHovered(true);
+                if (!btn.isSelected()) btn.setBorder(BorderFactory.createLineBorder(new Color(150, 150, 150), 2));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                aniPanel.setHovered(false);
+                if (!btn.isSelected()) btn.setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50), 2));
+            }
+        });
+        
+        btn.addItemListener(e -> {
+            boolean selected = (e.getStateChange() == java.awt.event.ItemEvent.SELECTED);
+            aniPanel.setSelected(selected);
+            Color glowColor = (playerNum == 1) ? new Color(0, 204, 255) : new Color(255, 50, 50);
+            btn.setBorder(BorderFactory.createLineBorder(selected ? glowColor : new Color(50, 50, 50), selected ? 3 : 2));
+        });
 
         // Logic
         ButtonGroup group = (playerNum == 1) ? p1Group : p2Group;
@@ -215,20 +258,36 @@ public class CharacterPick extends JFrame {
     private void addMapOption(JPanel parent, String imgName, int mapId) {
         JToggleButton btn = new JToggleButton();
         btn.setPreferredSize(new Dimension(200, 100));
-        btn.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+        btn.setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50), 2));
+        btn.setContentAreaFilled(false);
+        btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // Load Icon
         java.awt.image.BufferedImage img = LoadSave.GetSpriteAtlas(imgName);
         if (img != null) {
-            // Scale it roughly
-            Image scaled = img.getScaledInstance(190, 90, Image.SCALE_SMOOTH);
+            // Scale it smoothly
+            Image scaled = img.getScaledInstance(196, 96, Image.SCALE_SMOOTH);
             btn.setIcon(new ImageIcon(scaled));
         } else {
             btn.setText("MAP " + mapId);
             btn.setForeground(Color.WHITE);
-            btn.setBackground(Color.DARK_GRAY);
         }
+
+        // Hover & Selection Logic
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (!btn.isSelected()) btn.setBorder(BorderFactory.createLineBorder(new Color(150, 150, 150), 2));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (!btn.isSelected()) btn.setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50), 2));
+            }
+        });
+        
+        btn.addItemListener(e -> {
+            boolean selected = (e.getStateChange() == java.awt.event.ItemEvent.SELECTED);
+            btn.setBorder(BorderFactory.createLineBorder(selected ? new Color(0, 255, 100) : new Color(50, 50, 50), selected ? 4 : 2));
+        });
 
         mapGroup.add(btn);
 
@@ -277,7 +336,18 @@ public class CharacterPick extends JFrame {
 
         if (playButton != null) {
             playButton.setEnabled(ready);
-            playButton.setBackground(ready ? new Color(0, 255, 0) : new Color(0, 153, 153));
+            if (ready) {
+                playButton.setBackground(new Color(0, 200, 100)); // Bright modern green
+                playButton.setForeground(Color.WHITE);
+                playButton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(50, 255, 150), 3),
+                    BorderFactory.createEmptyBorder(5, 15, 5, 15)
+                ));
+            } else {
+                playButton.setBackground(new Color(50, 50, 50));
+                playButton.setForeground(Color.GRAY);
+                playButton.setBorder(BorderFactory.createEmptyBorder());
+            }
         }
     }
 
