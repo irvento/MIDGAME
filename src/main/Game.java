@@ -458,6 +458,63 @@ public class Game implements Runnable {
 
         trap.drawplayerwin(g, player1wins, player2wins, winwin);
 
+        drawCooldowns(g);
+    }
+
+    private void drawCooldowns(Graphics g) {
+        if (player1 == null || player2 == null) return;
+
+        java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
+        g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Player 1 Overlay (Under Healthbar)
+        int p1StartX = 20;
+        int p1StartY = 80;
+        drawSkillCircle(g2d, p1StartX, p1StartY, "S1", player1.getSkill1CooldownRemaining(), 600f, java.awt.Color.CYAN);
+        drawSkillCircle(g2d, p1StartX + 60, p1StartY, "S2", player1.getSkill2CooldownRemaining(), 2000f, java.awt.Color.CYAN);
+        drawSkillCircle(g2d, p1StartX + 120, p1StartY, "S3", player1.getSkill3CooldownRemaining(), 3500f, java.awt.Color.CYAN);
+        drawSkillCircle(g2d, p1StartX + 180, p1StartY, "R", player1.getHadoukenCooldownRemaining(), 1500f, java.awt.Color.CYAN);
+
+        // Player 2 Overlay (Under Healthbar, aligned right)
+        int p2StartX = GAME_WIDTH - 240;
+        int p2StartY = 80;
+        drawSkillCircle(g2d, p2StartX, p2StartY, "S1", player2.getSkill1CooldownRemaining(), 600f, java.awt.Color.RED);
+        drawSkillCircle(g2d, p2StartX + 60, p2StartY, "S2", player2.getSkill2CooldownRemaining(), 2000f, java.awt.Color.RED);
+        drawSkillCircle(g2d, p2StartX + 120, p2StartY, "S3", player2.getSkill3CooldownRemaining(), 3500f, java.awt.Color.RED);
+        drawSkillCircle(g2d, p2StartX + 180, p2StartY, "R", player2.getHadoukenCooldownRemaining(), 1500f, java.awt.Color.RED);
+    }
+
+    private void drawSkillCircle(java.awt.Graphics2D g2d, int x, int y, String name, long remaining, float max, java.awt.Color color) {
+        int diameter = 40;
+        
+        // Background circle
+        g2d.setColor(new java.awt.Color(0, 0, 0, 150));
+        g2d.fillOval(x, y, diameter, diameter);
+        
+        // Border
+        g2d.setColor(color);
+        g2d.setStroke(new java.awt.BasicStroke(2));
+        g2d.drawOval(x, y, diameter, diameter);
+        
+        if (remaining > 0) {
+            // Cooldown sweep
+            int angle = (int)(360 * (remaining / max));
+            g2d.setColor(new java.awt.Color(0, 0, 0, 200));
+            g2d.fillArc(x, y, diameter, diameter, 90, angle);
+
+            // Time remaining text
+            g2d.setColor(java.awt.Color.WHITE);
+            g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 12));
+            String text = String.format("%.1f", remaining / 1000.0f);
+            int textWidth = g2d.getFontMetrics().stringWidth(text);
+            g2d.drawString(text, x + (diameter - textWidth) / 2, y + 25);
+        } else {
+            // Ready text
+            g2d.setColor(color);
+            g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+            int textWidth = g2d.getFontMetrics().stringWidth(name);
+            g2d.drawString(name, x + (diameter - textWidth) / 2, y + 25);
+        }
     }
 
     private void player1won(boolean win) {

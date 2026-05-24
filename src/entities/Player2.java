@@ -716,6 +716,26 @@ public class Player2 extends Entity {
     private final long COOLDOWN_TIME_SKILL3 = 3500;
     private final long COOLDOWN_TIME_HADOUKEN = 1500;
 
+    public long getSkill1CooldownRemaining() {
+        long elapsed = System.currentTimeMillis() - lastSkill1Time;
+        return Math.max(0, COOLDOWN_TIME_SKILL1 - elapsed);
+    }
+
+    public long getSkill2CooldownRemaining() {
+        long elapsed = System.currentTimeMillis() - lastSkill2Time;
+        return Math.max(0, COOLDOWN_TIME_SKILL2 - elapsed);
+    }
+
+    public long getSkill3CooldownRemaining() {
+        long elapsed = System.currentTimeMillis() - lastSkill3Time;
+        return Math.max(0, COOLDOWN_TIME_SKILL3 - elapsed);
+    }
+
+    public long getHadoukenCooldownRemaining() {
+        long elapsed = System.currentTimeMillis() - lastHadoukenTime;
+        return Math.max(0, COOLDOWN_TIME_HADOUKEN - elapsed);
+    }
+
     public void executeSkill1(Player1 enemy) {
         if (System.currentTimeMillis() - lastSkill1Time > COOLDOWN_TIME_SKILL1) {
             main.Game.soundeffects("src\\sounds\\slice-wtr3.wav");
@@ -1125,13 +1145,14 @@ public class Player2 extends Entity {
                                 
                                 // Disable enemy movement for 1.5 seconds
                                 dashTargetEnemy.setMovementDisabled(true);
+                                final Player1 capturedEnemy = dashTargetEnemy;
                                 Timer disableTimer = new Timer();
                                 disableTimer.schedule(new TimerTask() {
                                     @Override
                                     public void run() {
                                         try {
-                                            if (dashTargetEnemy != null) {
-                                                dashTargetEnemy.setMovementDisabled(false);
+                                            if (capturedEnemy != null) {
+                                                capturedEnemy.setMovementDisabled(false);
                                             }
                                         } catch (Exception e) {
                                             // Handle errors
