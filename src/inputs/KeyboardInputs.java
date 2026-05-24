@@ -40,47 +40,19 @@ public class KeyboardInputs implements KeyListener {
             return;
         }
 
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_A:
-                gamePanel.getGame().getPlayer1().setLeft(false);
-                break;
-            case KeyEvent.VK_D:
-                gamePanel.getGame().getPlayer1().setRight(false);
-                break;
-            case KeyEvent.VK_W:
-                gamePanel.getGame().getPlayer1().setJump(false);
-                break;
-            case KeyEvent.VK_S:
-                gamePanel.getGame().getPlayer1().setDefend(false);
-                break;
+        int code = e.getKeyCode();
+        
+        // Player 1
+        if (code == KeyBindings.p1Left) gamePanel.getGame().getPlayer1().setLeft(false);
+        else if (code == KeyBindings.p1Right) gamePanel.getGame().getPlayer1().setRight(false);
+        else if (code == KeyBindings.p1Jump) gamePanel.getGame().getPlayer1().setJump(false);
+        else if (code == KeyBindings.p1Defend) gamePanel.getGame().getPlayer1().setDefend(false);
 
-            case KeyEvent.VK_Z:
-            case KeyEvent.VK_X:
-            case KeyEvent.VK_C:
-            case KeyEvent.VK_V:
-                // Attacks are edge-triggered on press, no release logic needed for boolean flags anymore
-                break;
-
-            case KeyEvent.VK_LEFT:
-                gamePanel.getGame().getPlayer2().setLeft2(false);
-                break;
-            case KeyEvent.VK_RIGHT:
-                gamePanel.getGame().getPlayer2().setRight2(false);
-                break;
-            case KeyEvent.VK_UP:
-                gamePanel.getGame().getPlayer2().setJump2(false);
-                break;
-            case KeyEvent.VK_DOWN:
-                gamePanel.getGame().getPlayer2().setDefend2(false);
-                break;
-
-            case KeyEvent.VK_NUMPAD1:
-            case KeyEvent.VK_NUMPAD2:
-            case KeyEvent.VK_NUMPAD3:
-            case KeyEvent.VK_NUMPAD4:
-                // Attacks are edge-triggered on press, no release logic needed for boolean flags anymore
-                break;
-        }
+        // Player 2
+        else if (code == KeyBindings.p2Left) gamePanel.getGame().getPlayer2().setLeft2(false);
+        else if (code == KeyBindings.p2Right) gamePanel.getGame().getPlayer2().setRight2(false);
+        else if (code == KeyBindings.p2Jump) gamePanel.getGame().getPlayer2().setJump2(false);
+        else if (code == KeyBindings.p2Defend) gamePanel.getGame().getPlayer2().setDefend2(false);
     }
 
     @Override
@@ -110,63 +82,31 @@ public class KeyboardInputs implements KeyListener {
             return;
         }
 
-        switch (e.getKeyCode()) {
-            // Player 1 Movement
-            case KeyEvent.VK_A:
-                gamePanel.getGame().getPlayer1().setLeft(true);
-                break;
-            case KeyEvent.VK_D:
-                gamePanel.getGame().getPlayer1().setRight(true);
-                break;
-            case KeyEvent.VK_W:
-                gamePanel.getGame().getPlayer1().setJump(true);
-                break;
-            case KeyEvent.VK_S:
-                gamePanel.getGame().getPlayer1().setDefend(true);
-                break;
+        int code = e.getKeyCode();
 
-            // Player 1 Attacks
-            case KeyEvent.VK_Z:
-                gamePanel.getGame().getPlayer1().executeSkill1(gamePanel.getGame().getPlayer2());
-                break;
-            case KeyEvent.VK_X:
-                gamePanel.getGame().getPlayer1().executeSkill2(gamePanel.getGame().getPlayer2());
-                break;
-            case KeyEvent.VK_C:
-                gamePanel.getGame().getPlayer1().executeSkill3(gamePanel.getGame().getPlayer2());
-                break;
-            case KeyEvent.VK_V:
-                gamePanel.getGame().getPlayer1().executeHadouken();
-                break;
+        // Player 1 Movement
+        if (code == KeyBindings.p1Left) gamePanel.getGame().getPlayer1().setLeft(true);
+        else if (code == KeyBindings.p1Right) gamePanel.getGame().getPlayer1().setRight(true);
+        else if (code == KeyBindings.p1Jump) gamePanel.getGame().getPlayer1().setJump(true);
+        else if (code == KeyBindings.p1Defend) gamePanel.getGame().getPlayer1().setDefend(true);
 
-            // Player 2 Movement
-            case KeyEvent.VK_LEFT:
-                gamePanel.getGame().getPlayer2().setLeft2(true);
-                break;
-            case KeyEvent.VK_RIGHT:
-                gamePanel.getGame().getPlayer2().setRight2(true);
-                break;
-            case KeyEvent.VK_UP:
-                gamePanel.getGame().getPlayer2().setJump2(true);
-                break;
-            case KeyEvent.VK_DOWN: // Ensure defend exists for P2
-                gamePanel.getGame().getPlayer2().setDefend2(true);
-                break;
+        // Player 1 Attacks
+        else if (code == KeyBindings.p1Attack1) gamePanel.getGame().getPlayer1().executeSkill1(gamePanel.getGame().getPlayer2());
+        else if (code == KeyBindings.p1Attack2) gamePanel.getGame().getPlayer1().executeSkill2(gamePanel.getGame().getPlayer2());
+        else if (code == KeyBindings.p1Attack3) gamePanel.getGame().getPlayer1().executeSkill3(gamePanel.getGame().getPlayer2());
+        else if (code == KeyBindings.p1Special) gamePanel.getGame().getPlayer1().executeHadouken();
 
-            // Player 2 Attacks
-            case KeyEvent.VK_NUMPAD1:
-                gamePanel.getGame().getPlayer2().executeSkill1(gamePanel.getGame().getPlayer1());
-                break;
-            case KeyEvent.VK_NUMPAD2:
-                gamePanel.getGame().getPlayer2().executeSkill2(gamePanel.getGame().getPlayer1());
-                break;
-            case KeyEvent.VK_NUMPAD3:
-                gamePanel.getGame().getPlayer2().executeSkill3(gamePanel.getGame().getPlayer1());
-                break;
-            case KeyEvent.VK_NUMPAD4:
-                gamePanel.getGame().getPlayer2().executeHadouken();
-                break;
-        }
+        // Player 2 Movement
+        else if (code == KeyBindings.p2Left) gamePanel.getGame().getPlayer2().setLeft2(true);
+        else if (code == KeyBindings.p2Right) gamePanel.getGame().getPlayer2().setRight2(true);
+        else if (code == KeyBindings.p2Jump) gamePanel.getGame().getPlayer2().setJump2(true);
+        else if (code == KeyBindings.p2Defend) gamePanel.getGame().getPlayer2().setDefend2(true);
+
+        // Player 2 Attacks
+        else if (code == KeyBindings.p2Attack1) gamePanel.getGame().getPlayer2().executeSkill1(gamePanel.getGame().getPlayer1());
+        else if (code == KeyBindings.p2Attack2) gamePanel.getGame().getPlayer2().executeSkill2(gamePanel.getGame().getPlayer1());
+        else if (code == KeyBindings.p2Attack3) gamePanel.getGame().getPlayer2().executeSkill3(gamePanel.getGame().getPlayer1());
+        else if (code == KeyBindings.p2Special) gamePanel.getGame().getPlayer2().executeHadouken();
     }
 
     public static void restart() {

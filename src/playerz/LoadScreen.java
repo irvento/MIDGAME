@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.*;
+import java.awt.event.KeyEvent;
 import main.MusicPlayer;
 
 public class LoadScreen extends JFrame {
@@ -67,19 +68,21 @@ public class LoadScreen extends JFrame {
 
         // Player 1 Controls
         JPanel p1Panel = createControlsPanel("PLAYER 1", new Color(100, 200, 255));
-        addControlLine(p1Panel, "W, A, S, D", "Move / Jump / Defend");
-        addControlLine(p1Panel, "Z", "Attack 1");
-        addControlLine(p1Panel, "X", "Attack 2 (Skill)");
-        addControlLine(p1Panel, "C", "Attack 3 (Ult)");
-        addControlLine(p1Panel, "V", "Hadouken");
+        String p1Move = KeyEvent.getKeyText(inputs.KeyBindings.p1Left) + ", " + KeyEvent.getKeyText(inputs.KeyBindings.p1Right) + ", " + KeyEvent.getKeyText(inputs.KeyBindings.p1Jump) + ", " + KeyEvent.getKeyText(inputs.KeyBindings.p1Defend);
+        addControlLine(p1Panel, p1Move, "Move / Jump / Defend");
+        addControlLine(p1Panel, KeyEvent.getKeyText(inputs.KeyBindings.p1Attack1), "Attack 1");
+        addControlLine(p1Panel, KeyEvent.getKeyText(inputs.KeyBindings.p1Attack2), "Attack 2 (Skill)");
+        addControlLine(p1Panel, KeyEvent.getKeyText(inputs.KeyBindings.p1Attack3), "Attack 3 (Ult)");
+        addControlLine(p1Panel, KeyEvent.getKeyText(inputs.KeyBindings.p1Special), "Hadouken");
 
         // Player 2 Controls
         JPanel p2Panel = createControlsPanel("PLAYER 2", new Color(255, 100, 100));
-        addControlLine(p2Panel, "Arrow Keys", "Move / Jump");
-        addControlLine(p2Panel, "Numpad 1", "Attack 1");
-        addControlLine(p2Panel, "Numpad 2", "Attack 2 (Skill)");
-        addControlLine(p2Panel, "Numpad 3", "Attack 3 (Ult)");
-        addControlLine(p2Panel, "Numpad 4", "Hadouken");
+        String p2Move = KeyEvent.getKeyText(inputs.KeyBindings.p2Left) + ", " + KeyEvent.getKeyText(inputs.KeyBindings.p2Right) + ", " + KeyEvent.getKeyText(inputs.KeyBindings.p2Jump) + ", " + KeyEvent.getKeyText(inputs.KeyBindings.p2Defend);
+        addControlLine(p2Panel, p2Move, "Move / Jump / Defend");
+        addControlLine(p2Panel, KeyEvent.getKeyText(inputs.KeyBindings.p2Attack1), "Attack 1");
+        addControlLine(p2Panel, KeyEvent.getKeyText(inputs.KeyBindings.p2Attack2), "Attack 2 (Skill)");
+        addControlLine(p2Panel, KeyEvent.getKeyText(inputs.KeyBindings.p2Attack3), "Attack 3 (Ult)");
+        addControlLine(p2Panel, KeyEvent.getKeyText(inputs.KeyBindings.p2Special), "Hadouken");
 
         centerPanel.add(p1Panel);
         centerPanel.add(p2Panel);
