@@ -59,6 +59,10 @@ public class Game implements Runnable {
             gif2 = false, gif3 = false, gif4 = false, gif5 = false, gif6 = false, gif7 = false, dialog = false;
     private int A = 0, B = 0, a, b;
     private Clip clip;
+    
+    // Controller previous states
+    private boolean p1XPrev = false, p1YPrev = false, p1BPrev = false, p1RbPrev = false;
+    private boolean p2XPrev = false, p2YPrev = false, p2BPrev = false, p2RbPrev = false;
 
     public final static int TILES_DEFAULT_SIZE = 32;
     public final static float SCALE = 2f;
@@ -373,10 +377,15 @@ public class Game implements Runnable {
                             player1.setJump(p1State.dpadUp || p1State.a || p1State.leftStickY > 0.5f);
                             player1.setDefend(p1State.dpadDown || p1State.leftStickY < -0.5f);
                             
-                            if (p1State.x) player1.executeSkill1(player2);
-                            if (p1State.y) player1.executeSkill2(player2);
-                            if (p1State.b) player1.executeSkill3(player2);
-                            if (p1State.rb) player1.executeHadouken();
+                            if (p1State.x && !p1XPrev) player1.executeSkill1(player2);
+                            if (p1State.y && !p1YPrev) player1.executeSkill2(player2);
+                            if (p1State.b && !p1BPrev) player1.executeSkill3(player2);
+                            if (p1State.rb && !p1RbPrev) player1.executeHadouken();
+                            
+                            p1XPrev = p1State.x;
+                            p1YPrev = p1State.y;
+                            p1BPrev = p1State.b;
+                            p1RbPrev = p1State.rb;
                         }
 
                         // Player 2 Controller (Index 1)
@@ -387,10 +396,15 @@ public class Game implements Runnable {
                             player2.setJump2(p2State.dpadUp || p2State.a || p2State.leftStickY > 0.5f);
                             player2.setDefend2(p2State.dpadDown || p2State.leftStickY < -0.5f);
                             
-                            if (p2State.x) player2.executeSkill1(player1);
-                            if (p2State.y) player2.executeSkill2(player1);
-                            if (p2State.b) player2.executeSkill3(player1);
-                            if (p2State.rb) player2.executeHadouken();
+                            if (p2State.x && !p2XPrev) player2.executeSkill1(player1);
+                            if (p2State.y && !p2YPrev) player2.executeSkill2(player1);
+                            if (p2State.b && !p2BPrev) player2.executeSkill3(player1);
+                            if (p2State.rb && !p2RbPrev) player2.executeHadouken();
+                            
+                            p2XPrev = p2State.x;
+                            p2YPrev = p2State.y;
+                            p2BPrev = p2State.b;
+                            p2RbPrev = p2State.rb;
                         }
                     } catch (Throwable t) {
                         // Disable controllers on error
