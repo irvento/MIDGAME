@@ -37,6 +37,21 @@ public class Player1 extends Entity {
 	private float jumpSpeed = -2.25f * Game.SCALE;
 	private float fallSpeedAfterCollision = 0.5f * Game.SCALE;
 	private boolean inAir = false;
+
+	// Smooth Movement Physics & Momentum
+	private float currentSpeedX = 0f;
+	private float accel = 0.35f;
+	private float friction = 0.30f;
+
+	// Coyote Time, Jump Buffering & Knockback Physics
+	private int coyoteTimer = 0;
+	private final int MAX_COYOTE_TIME = 8;
+	private int jumpBufferTimer = 0;
+	private final int MAX_JUMP_BUFFER = 8;
+	private float knockbackX = 0f;
+
+	// After-Image Motion Ghost Trails
+	private java.util.LinkedList<float[]> dashTrails = new java.util.LinkedList<>();
         
         private BufferedImage HealthBarImg;
 
@@ -234,6 +249,7 @@ public class Player1 extends Entity {
                float seconds = (float) (6);
                }
             
+                drawDashTrails(g);
 		g.drawImage(animations[playerAction][aniIndex], (int) (hitbox.x - xDrawOffset) + flipX, (int) (hitbox.y - yDrawOffset), width * flipW, height, null);
                 drawStatusEffects(g);
                 drawUI(g);
@@ -259,6 +275,10 @@ public class Player1 extends Entity {
                     amount = amount / 3; // Blocking reduces damage to 1/3
                 }
 		currentHealth -= amount;
+                
+                // Knockback impulse
+                float kbDir = (flipW == 1) ? -1.0f : 1.0f;
+                knockbackX = kbDir * 3.5f * Game.SCALE;
                 
                 // Spawn collision spark at random location within hitbox
                 spawnCollisionSpark();
@@ -350,23 +370,42 @@ public class Player1 extends Entity {
             },475);
         }
         
-	private void updateAnimationTick() {
-            if (paused){
-		aniTick++;
-		if (aniTick >= aniSpeed) {
-			aniTick = 0;
-			aniIndex++;
-			if (aniIndex >= GetSpriteAmount(playerAction)) {
-				aniIndex = 0;
-				attacking = false;
-                                attacking1 = false;
-                                parrying = false;
-                               
-			}
-                }
-
+	private int getAniSpeed(int action) {
+		switch (action) {
+			case ATTACK_1:
+			case ATTACK_JUMP_1:
+			case ATTACK_JUMP_2:
+				return 7; // Fast, snappy attack frames
+			case RUNNING:
+				return 10; // Fluid running stance
+			case JUMP:
+			case FALLING:
+				return 11; // Dynamic airborne frames
+			case HURT:
+				return 8;
+			case DEAD:
+				return 14;
+			case IDLE:
+			default:
+				return 18; // Smooth breathing stance
 		}
+	}
 
+	private void updateAnimationTick() {
+		if (paused) {
+			aniTick++;
+			int targetSpeed = getAniSpeed(playerAction);
+			if (aniTick >= targetSpeed) {
+				aniTick = 0;
+				aniIndex++;
+				if (aniIndex >= GetSpriteAmount(playerAction)) {
+					aniIndex = 0;
+					attacking = false;
+					attacking1 = false;
+					parrying = false;
+				}
+			}
+		}
 	}
         
         private void nomoving(){
@@ -467,32 +506,74 @@ public class Player1 extends Entity {
 
 	private void updatePos() {
 		moving = false;
-                
-                // Don't allow movement if disabled
-                if (movementDisabled) {
-                    return;
-                }
 
-		if (jump)
-			jump();
-		if (!left && !right && !inAir)
+		if (movementDisabled) {
 			return;
+		}
 
-		float xSpeed = 0;
+		// Coyote time & Jump buffer logic
+		if (IsEntityOnFloor(hitbox, lvlData)) {
+			coyoteTimer = MAX_COYOTE_TIME;
+		} else if (coyoteTimer > 0) {
+			coyoteTimer--;
+		}
 
-		if (left){
-			xSpeed -= playerSpeed;
-                        flipX = width;
-                        flipW = -1;
-                }
-		if (right){                       
-			xSpeed += playerSpeed;
-                        flipX = 0;
-                        flipW = 1;
-                }        
-		if (!inAir)
-			if (!IsEntityOnFloor(hitbox, lvlData))
+		if (jump) {
+			jumpBufferTimer = MAX_JUMP_BUFFER;
+		} else if (jumpBufferTimer > 0) {
+			jumpBufferTimer--;
+		}
+
+		if ((jump || jumpBufferTimer > 0) && (coyoteTimer > 0 || !inAir)) {
+			jump();
+		}
+
+		// Variable jump height
+		if (!jump && inAir && airSpeed < 0) {
+			airSpeed *= 0.85f;
+		}
+
+		float targetSpeedX = 0;
+		if (left) {
+			targetSpeedX -= playerSpeed;
+			flipX = width;
+			flipW = -1;
+		}
+		if (right) {
+			targetSpeedX += playerSpeed;
+			flipX = 0;
+			flipW = 1;
+		}
+
+		// Smooth acceleration & friction
+		if (targetSpeedX != 0) {
+			currentSpeedX += Math.signum(targetSpeedX) * accel;
+			if (Math.abs(currentSpeedX) > playerSpeed) {
+				currentSpeedX = Math.signum(targetSpeedX) * playerSpeed;
+			}
+			moving = true;
+		} else {
+			if (currentSpeedX > 0) {
+				currentSpeedX = Math.max(0, currentSpeedX - friction);
+			} else if (currentSpeedX < 0) {
+				currentSpeedX = Math.min(0, currentSpeedX + friction);
+			}
+			if (Math.abs(currentSpeedX) > 0.05f) {
+				moving = true;
+			}
+		}
+
+		float xSpeed = currentSpeedX + knockbackX;
+		knockbackX *= 0.82f;
+		if (Math.abs(knockbackX) < 0.05f) {
+			knockbackX = 0f;
+		}
+
+		if (!inAir) {
+			if (!IsEntityOnFloor(hitbox, lvlData)) {
 				inAir = true;
+			}
+		}
 
 		if (inAir) {
 			if (CanMoveHere(hitbox.x, hitbox.y + airSpeed, hitbox.width, hitbox.height, lvlData)) {
@@ -501,29 +582,58 @@ public class Player1 extends Entity {
 				updateXPos(xSpeed);
 			} else {
 				hitbox.y = GetEntityYPosUnderRoofOrAboveFloor(hitbox, airSpeed);
-				if (airSpeed > 0)
+				if (airSpeed > 0) {
 					resetInAir();
-				else
+				} else {
 					airSpeed = fallSpeedAfterCollision;
+				}
 				updateXPos(xSpeed);
 			}
-
-		} else
+		} else {
 			updateXPos(xSpeed);
-		moving = true;
-                
-                /* if(killed2 || currentHealth <= 0){
-                resetPosition();
-                }*/
-                
+		}
+
+		updateDashTrail();
+	}
+
+	private void updateDashTrail() {
+		if (attacking || parrying || attacking1 || isSwapping || Math.abs(currentSpeedX) > playerSpeed * 0.9f) {
+			dashTrails.add(new float[]{hitbox.x, hitbox.y, flipX, flipW, playerAction, aniIndex});
+			if (dashTrails.size() > 4) {
+				dashTrails.removeFirst();
+			}
+		} else if (!dashTrails.isEmpty()) {
+			dashTrails.removeFirst();
+		}
+	}
+
+	private void drawDashTrails(Graphics g) {
+		if (dashTrails.isEmpty() || g == null) return;
+		java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
+		java.awt.Composite origComp = g2d.getComposite();
+		int i = 0;
+		int count = dashTrails.size();
+		for (float[] trail : dashTrails) {
+			float alpha = (float) (i + 1) / (count + 1) * 0.35f;
+			g2d.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, alpha));
+			int tx = (int) (trail[0] - xDrawOffset) + (int) trail[2];
+			int ty = (int) (trail[1] - yDrawOffset);
+			int tw = width * (int) trail[3];
+			int act = (int) trail[4];
+			int idx = (int) trail[5];
+			if (act >= 0 && act < animations.length && idx >= 0 && idx < animations[act].length && animations[act][idx] != null) {
+				g2d.drawImage(animations[act][idx], tx, ty, tw, height, null);
+			}
+			i++;
+		}
+		g2d.setComposite(origComp);
 	}
 
 	private void jump() {
-		if (inAir)
-			return;
 		inAir = true;
 		airSpeed = jumpSpeed;
-
+		coyoteTimer = 0;
+		jumpBufferTimer = 0;
 	}
 
 	private void resetInAir() {

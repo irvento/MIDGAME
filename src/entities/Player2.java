@@ -45,6 +45,21 @@ public class Player2 extends Entity {
 	private float jumpSpeed = -2.25f * Game.SCALE;
 	private float fallSpeedAfterCollision = 0.5f * Game.SCALE;
 	private boolean inAir = false;
+
+	// Smooth Movement Physics & Momentum
+	private float currentSpeedX = 0f;
+	private float accel = 0.35f;
+	private float friction = 0.30f;
+
+	// Coyote Time, Jump Buffering & Knockback Physics
+	private int coyoteTimer = 0;
+	private final int MAX_COYOTE_TIME = 8;
+	private int jumpBufferTimer = 0;
+	private final int MAX_JUMP_BUFFER = 8;
+	private float knockbackX = 0f;
+
+	// After-Image Motion Ghost Trails
+	private java.util.LinkedList<float[]> dashTrails = new java.util.LinkedList<>();
         private int varvalues = CharacterPick.getPicked();
         private boolean b = false;
         private BufferedImage HealthBarImg2;
@@ -280,6 +295,7 @@ public class Player2 extends Entity {
               float seconds = (float) (6);
             
             }
+                drawDashTrails(g);
 		g.drawImage(animations2[playerAction2][aniIndex2], (int) (hitbox.x - xDrawOffset2) + flipX, (int) (hitbox.y - yDrawOffset2), width * flipW, height, null);
                 drawStatusEffects(g);
                 drawUI2(g);
@@ -302,22 +318,42 @@ public class Player2 extends Entity {
             },474);
         }
 
-	private void updateAnimationTick() {
-            if (paused){
-		aniTick2++;
-		if (aniTick2 >= aniSpeed2) {
-			aniTick2 = 0;
-			aniIndex2++;
-			if (aniIndex2 >= GetSpriteAmount(playerAction2)) {
-				aniIndex2 = 0;
-				attacking2 = false;
-                                attacking22 = false;
-                                parrying2 = false;
-                        }
-			}
-
+	private int getAniSpeed(int action) {
+		switch (action) {
+			case ATTACK_1:
+			case ATTACK_JUMP_1:
+			case ATTACK_JUMP_2:
+				return 7; // Fast, snappy attack frames
+			case RUNNING:
+				return 10; // Fluid running stance
+			case JUMP:
+			case FALLING:
+				return 11; // Dynamic airborne frames
+			case HURT:
+				return 8;
+			case DEAD:
+				return 14;
+			case IDLE:
+			default:
+				return 18; // Smooth breathing stance
 		}
+	}
 
+	private void updateAnimationTick() {
+		if (paused) {
+			aniTick2++;
+			int targetSpeed = getAniSpeed(playerAction2);
+			if (aniTick2 >= targetSpeed) {
+				aniTick2 = 0;
+				aniIndex2++;
+				if (aniIndex2 >= GetSpriteAmount(playerAction2)) {
+					aniIndex2 = 0;
+					attacking2 = false;
+					attacking22 = false;
+					parrying2 = false;
+				}
+			}
+		}
 	}
 
 	private void setAnimation() {
@@ -398,6 +434,10 @@ public class Player2 extends Entity {
                 }
 		currentHealth2 -= amount;
                 
+                // Knockback impulse
+                float kbDir = (flipW == 1) ? -1.0f : 1.0f;
+                knockbackX = kbDir * 3.5f * Game.SCALE;
+                
                 // Spawn collision spark at random location within hitbox
                 spawnCollisionSpark();
                 
@@ -447,32 +487,74 @@ public class Player2 extends Entity {
 
 	private void updatePos() {
 		moving = false;
-                
-                // Don't allow movement if disabled
-                if (movementDisabled) {
-                    return;
-                }
 
-		if (jump2)
-			jump();
-		if (!left2 && !right2 && !inAir2)
+		if (movementDisabled) {
 			return;
+		}
 
-		float xSpeed = 0;
+		// Coyote time & Jump buffer logic
+		if (IsEntityOnFloor(hitbox, lvlData2)) {
+			coyoteTimer = MAX_COYOTE_TIME;
+		} else if (coyoteTimer > 0) {
+			coyoteTimer--;
+		}
 
-		if (left2){
-			xSpeed -= playerSpeed2;
-                        flipX = width;
-                        flipW = -1;
-                }
-		if (right2){                       
-			xSpeed += playerSpeed2;
-                        flipX = 0;
-                        flipW = 1;
-                }        
-		if (!inAir2)
-			if (!IsEntityOnFloor(hitbox, lvlData2))
+		if (jump2) {
+			jumpBufferTimer = MAX_JUMP_BUFFER;
+		} else if (jumpBufferTimer > 0) {
+			jumpBufferTimer--;
+		}
+
+		if ((jump2 || jumpBufferTimer > 0) && (coyoteTimer > 0 || !inAir2)) {
+			jump();
+		}
+
+		// Variable jump height
+		if (!jump2 && inAir2 && airSpeed < 0) {
+			airSpeed *= 0.85f;
+		}
+
+		float targetSpeedX = 0;
+		if (left2) {
+			targetSpeedX -= playerSpeed2;
+			flipX = width;
+			flipW = -1;
+		}
+		if (right2) {
+			targetSpeedX += playerSpeed2;
+			flipX = 0;
+			flipW = 1;
+		}
+
+		// Smooth acceleration & friction
+		if (targetSpeedX != 0) {
+			currentSpeedX += Math.signum(targetSpeedX) * accel;
+			if (Math.abs(currentSpeedX) > playerSpeed2) {
+				currentSpeedX = Math.signum(targetSpeedX) * playerSpeed2;
+			}
+			moving = true;
+		} else {
+			if (currentSpeedX > 0) {
+				currentSpeedX = Math.max(0, currentSpeedX - friction);
+			} else if (currentSpeedX < 0) {
+				currentSpeedX = Math.min(0, currentSpeedX + friction);
+			}
+			if (Math.abs(currentSpeedX) > 0.05f) {
+				moving = true;
+			}
+		}
+
+		float xSpeed = currentSpeedX + knockbackX;
+		knockbackX *= 0.82f;
+		if (Math.abs(knockbackX) < 0.05f) {
+			knockbackX = 0f;
+		}
+
+		if (!inAir2) {
+			if (!IsEntityOnFloor(hitbox, lvlData2)) {
 				inAir2 = true;
+			}
+		}
 
 		if (inAir2) {
 			if (CanMoveHere(hitbox.x, hitbox.y + airSpeed, hitbox.width, hitbox.height, lvlData2)) {
@@ -481,24 +563,58 @@ public class Player2 extends Entity {
 				updateXPos(xSpeed);
 			} else {
 				hitbox.y = GetEntityYPosUnderRoofOrAboveFloor(hitbox, airSpeed);
-				if (airSpeed > 0)
+				if (airSpeed > 0) {
 					resetInAir2();
-				else
+				} else {
 					airSpeed = fallSpeedAfterCollision;
+				}
 				updateXPos(xSpeed);
 			}
-
-		} else
+		} else {
 			updateXPos(xSpeed);
-		moving = true;
+		}
+
+		updateDashTrail();
+	}
+
+	private void updateDashTrail() {
+		if (attacking2 || parrying2 || attacking22 || isSwapping || Math.abs(currentSpeedX) > playerSpeed2 * 0.9f) {
+			dashTrails.add(new float[]{hitbox.x, hitbox.y, flipX, flipW, playerAction2, aniIndex2});
+			if (dashTrails.size() > 4) {
+				dashTrails.removeFirst();
+			}
+		} else if (!dashTrails.isEmpty()) {
+			dashTrails.removeFirst();
+		}
+	}
+
+	private void drawDashTrails(Graphics g) {
+		if (dashTrails.isEmpty() || g == null) return;
+		java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
+		java.awt.Composite origComp = g2d.getComposite();
+		int i = 0;
+		int count = dashTrails.size();
+		for (float[] trail : dashTrails) {
+			float alpha = (float) (i + 1) / (count + 1) * 0.35f;
+			g2d.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, alpha));
+			int tx = (int) (trail[0] - xDrawOffset2) + (int) trail[2];
+			int ty = (int) (trail[1] - yDrawOffset2);
+			int tw = width * (int) trail[3];
+			int act = (int) trail[4];
+			int idx = (int) trail[5];
+			if (act >= 0 && act < animations2.length && idx >= 0 && idx < animations2[act].length && animations2[act][idx] != null) {
+				g2d.drawImage(animations2[act][idx], tx, ty, tw, height, null);
+			}
+			i++;
+		}
+		g2d.setComposite(origComp);
 	}
 
 	private void jump() {
-		if (inAir2)
-			return;
 		inAir2 = true;
 		airSpeed = jumpSpeed;
-
+		coyoteTimer = 0;
+		jumpBufferTimer = 0;
 	}
 
 	private void resetInAir2() {

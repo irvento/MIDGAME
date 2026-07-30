@@ -64,6 +64,22 @@ public class Game implements Runnable {
     private boolean p1XPrev = false, p1YPrev = false, p1BPrev = false, p1RbPrev = false;
     private boolean p2XPrev = false, p2YPrev = false, p2BPrev = false, p2RbPrev = false;
 
+    // Screen Shake & Hitstop system
+    private int shakeDuration = 0;
+    private float shakeIntensity = 0f;
+    private int shakeOffsetX = 0;
+    private int shakeOffsetY = 0;
+    private int hitstopFrames = 0;
+
+    public void triggerScreenShake(float intensity, int duration) {
+        this.shakeIntensity = intensity;
+        this.shakeDuration = duration;
+    }
+
+    public void triggerHitstop(int frames) {
+        this.hitstopFrames = frames;
+    }
+
     public final static int TILES_DEFAULT_SIZE = 32;
     public final static float SCALE = 2f;
     public final static int TILES_IN_WIDTH = 26;
@@ -338,6 +354,21 @@ public class Game implements Runnable {
 
     public void update() throws InterruptedException {
         try {
+            if (hitstopFrames > 0) {
+                hitstopFrames--;
+                return;
+            }
+
+            if (shakeDuration > 0) {
+                shakeDuration--;
+                shakeOffsetX = (int) ((Math.random() * 2 - 1) * shakeIntensity);
+                shakeOffsetY = (int) ((Math.random() * 2 - 1) * shakeIntensity);
+                shakeIntensity *= 0.88f;
+            } else {
+                shakeOffsetX = 0;
+                shakeOffsetY = 0;
+            }
+
             if (dialog) {
                 delaydialog();
             }
@@ -449,6 +480,10 @@ public class Game implements Runnable {
     private int play2 = CharacterPick.getPicked();
 
     public void render(Graphics g) {
+        java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
+        if (shakeOffsetX != 0 || shakeOffsetY != 0) {
+            g2d.translate(shakeOffsetX, shakeOffsetY);
+        }
 
         trap.drawBG(g);
         trap.render(g);
@@ -483,6 +518,10 @@ public class Game implements Runnable {
         trap.drawplayerwin(g, player1wins, player2wins, winwin);
 
         drawCooldowns(g);
+
+        if (shakeOffsetX != 0 || shakeOffsetY != 0) {
+            g2d.translate(-shakeOffsetX, -shakeOffsetY);
+        }
     }
 
     private void drawCooldowns(Graphics g) {
@@ -994,6 +1033,8 @@ public class Game implements Runnable {
 
     public void spawnCollisionSpark(float x, float y) {
         try {
+            triggerScreenShake(7.5f, 5);
+            triggerHitstop(2);
             if (collisionSparkSprite != null && collisionSparks != null) {
                 CollisionSpark spark = new CollisionSpark(x, y, collisionSparkSprite);
                 collisionSparks.add(spark);
