@@ -39,9 +39,8 @@ public class LoadScreen extends JFrame {
     private void initFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setUndecorated(true);
-        setSize(1664, 896); // Match game resolution
-        setLocationRelativeTo(null);
         setTitle("Loading...");
+        utilz.WindowScaler.fitFrame(this, 1664, 896);
     }
 
     private void initUI() {

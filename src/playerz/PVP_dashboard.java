@@ -30,7 +30,7 @@ public class PVP_dashboard extends JFrame {
     public PVP_dashboard() {
         musicPlayer.play2(true);
         initComponents();
-        
+        utilz.WindowScaler.fitFrame(this, 1664, 896);
     }
 
     /**

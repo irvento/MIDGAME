@@ -53,7 +53,7 @@ public class SettingsScreen extends JFrame {
         setTitle("Settings & Controls");
         setUndecorated(true);
         setResizable(false);
-        setSize(1000, 700);
+        utilz.WindowScaler.fitFrame(this, 1000, 700);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(new Color(20, 20, 20));

@@ -39,8 +39,36 @@ public class GamePanel extends JPanel {
 			g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 			g2d.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 			g2d.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+
+			int panelWidth = getWidth();
+			int panelHeight = getHeight();
+
+			if (panelWidth > 0 && panelHeight > 0) {
+				double scaleX = (double) panelWidth / GAME_WIDTH;
+				double scaleY = (double) panelHeight / GAME_HEIGHT;
+				double scale = Math.min(scaleX, scaleY);
+
+				int drawWidth = (int) (GAME_WIDTH * scale);
+				int drawHeight = (int) (GAME_HEIGHT * scale);
+
+				int offsetX = (panelWidth - drawWidth) / 2;
+				int offsetY = (panelHeight - drawHeight) / 2;
+
+				// Fill background margins with black
+				g2d.setColor(java.awt.Color.BLACK);
+				g2d.fillRect(0, 0, panelWidth, panelHeight);
+
+				// Translate & scale for virtual 1664x896 game canvas
+				g2d.translate(offsetX, offsetY);
+				g2d.scale(scale, scale);
+
+				game.render(g2d);
+			} else {
+				game.render(g2d);
+			}
+		} else {
+			game.render(g);
 		}
-		game.render(g);
 	}
 
 	public Game getGame() {

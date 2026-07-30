@@ -15,6 +15,7 @@ public class Story extends javax.swing.JFrame {
      */
     public Story() {
         initComponents();
+        utilz.WindowScaler.fitFrame(this, 1664, 896);
     }
 
     /**

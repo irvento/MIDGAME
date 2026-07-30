@@ -23,6 +23,7 @@ public class Loading2 extends javax.swing.JFrame {
     public Loading2() {
         musicPlayer.play3(true);
         initComponents();
+        utilz.WindowScaler.fitFrame(this, 1664, 896);
         Thread t = new Thread(new Runnable(){
             @Override
             public void run(){

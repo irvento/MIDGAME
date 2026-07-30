@@ -48,9 +48,8 @@ public class CharacterPick extends JFrame {
     private void initFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setUndecorated(true);
-        setSize(1664, 896);
-        setLocationRelativeTo(null);
         setTitle("Choose Your Character");
+        utilz.WindowScaler.fitFrame(this, 1664, 896);
     }
 
     private void initUI() {

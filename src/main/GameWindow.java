@@ -14,10 +14,9 @@ public class GameWindow {
 
 		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jframe.add(gamePanel);
-		jframe.setResizable(false);
-                jframe.setUndecorated(true);
-		jframe.pack();
-                jframe.setLocationRelativeTo(null);
+		jframe.setResizable(true);
+		jframe.setUndecorated(true);
+		utilz.WindowScaler.fitFrame(jframe, Game.GAME_WIDTH, Game.GAME_HEIGHT);
 		jframe.setVisible(true);
 		jframe.addWindowFocusListener(new WindowFocusListener() {
 
