@@ -61,8 +61,12 @@ public class Game implements Runnable {
     private Clip clip;
     
     // Controller previous states
-    private boolean p1XPrev = false, p1YPrev = false, p1BPrev = false, p1RbPrev = false;
-    private boolean p2XPrev = false, p2YPrev = false, p2BPrev = false, p2RbPrev = false;
+    private boolean p1XPrev = false, p1YPrev = false, p1BPrev = false, p1RbPrev = false, p1StartPrev = false;
+    private boolean p2XPrev = false, p2YPrev = false, p2BPrev = false, p2RbPrev = false, p2StartPrev = false;
+
+    // Pause state
+    private boolean isPaused = false;
+    private long pauseStartTime = 0;
 
     // Screen Shake & Hitstop system
     private int shakeDuration = 0;
@@ -354,6 +358,34 @@ public class Game implements Runnable {
 
     public void update() throws InterruptedException {
         try {
+            // Poll controllers for pause toggle even when paused
+            if (controllers != null) {
+                try {
+                    controllers.update();
+                    ControllerState p1State = controllers.getState(0);
+                    if (p1State.isConnected) {
+                        if (p1State.start && !p1StartPrev) {
+                            togglePause();
+                        }
+                        p1StartPrev = p1State.start;
+                    }
+
+                    ControllerState p2State = controllers.getState(1);
+                    if (p2State.isConnected) {
+                        if (p2State.start && !p2StartPrev) {
+                            togglePause();
+                        }
+                        p2StartPrev = p2State.start;
+                    }
+                } catch (Throwable t) {
+                    controllers = null;
+                }
+            }
+
+            if (isPaused) {
+                return;
+            }
+
             if (hitstopFrames > 0) {
                 hitstopFrames--;
                 return;
@@ -518,6 +550,10 @@ public class Game implements Runnable {
         trap.drawplayerwin(g, player1wins, player2wins, winwin);
 
         drawCooldowns(g);
+
+        if (isPaused) {
+            drawPauseOverlay(g);
+        }
 
         if (shakeOffsetX != 0 || shakeOffsetY != 0) {
             g2d.translate(-shakeOffsetX, -shakeOffsetY);
@@ -1043,6 +1079,186 @@ public class Game implements Runnable {
             // Silently handle errors to prevent crashes
             System.out.println("Error spawning collision spark: " + e.getMessage());
         }
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    public long getPauseStartTime() {
+        return pauseStartTime;
+    }
+
+    public void setPaused(boolean paused) {
+        if (this.isPaused != paused) {
+            togglePause();
+        }
+    }
+
+    public void togglePause() {
+        this.isPaused = !this.isPaused;
+        long now = System.currentTimeMillis();
+        if (this.isPaused) {
+            this.pauseStartTime = now;
+        } else {
+            long pauseDuration = now - this.pauseStartTime;
+            if (pauseDuration > 0) {
+                if (player1 != null) {
+                    player1.adjustCooldownsForPause(pauseDuration);
+                }
+                if (player2 != null) {
+                    player2.adjustCooldownsForPause(pauseDuration);
+                }
+            }
+        }
+    }
+
+    private void drawPauseOverlay(Graphics g) {
+        java.awt.Graphics2D g2d = (java.awt.Graphics2D) g;
+        g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING, java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        // 1. Dark Backdrop Overlay with slight vignette effect
+        g2d.setColor(new java.awt.Color(5, 8, 18, 210));
+        g2d.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        // Ambient cyber grid lines
+        g2d.setColor(new java.awt.Color(0, 220, 255, 10));
+        for (int i = 0; i < GAME_WIDTH; i += 64) {
+            g2d.drawLine(i, 0, i, GAME_HEIGHT);
+        }
+        for (int j = 0; j < GAME_HEIGHT; j += 64) {
+            g2d.drawLine(0, j, GAME_WIDTH, j);
+        }
+
+        // 2. Pause Card Dimensions
+        int cardWidth = 580;
+        int cardHeight = 360;
+        int cardX = (GAME_WIDTH - cardWidth) / 2;
+        int cardY = (GAME_HEIGHT - cardHeight) / 2;
+
+        // Card Glow Drop Shadow
+        for (int i = 8; i >= 1; i--) {
+            g2d.setColor(new java.awt.Color(0, 180, 255, 12 - i));
+            g2d.fillRoundRect(cardX - i, cardY - i, cardWidth + i * 2, cardHeight + i * 2, 28, 28);
+        }
+
+        // Card Background (Glassmorphism dark theme)
+        g2d.setColor(new java.awt.Color(16, 22, 36, 245));
+        g2d.fillRoundRect(cardX, cardY, cardWidth, cardHeight, 24, 24);
+
+        // Card Border with glowing cyan edge
+        g2d.setStroke(new java.awt.BasicStroke(2.5f));
+        g2d.setColor(new java.awt.Color(0, 220, 255, 200));
+        g2d.drawRoundRect(cardX, cardY, cardWidth, cardHeight, 24, 24);
+
+        // Corner decorative accents
+        g2d.setColor(new java.awt.Color(255, 215, 0, 230)); // Gold accent corners
+        g2d.setStroke(new java.awt.BasicStroke(3.5f));
+        int accLen = 18;
+        // Top-left corner
+        g2d.drawLine(cardX + 8, cardY + 8, cardX + 8 + accLen, cardY + 8);
+        g2d.drawLine(cardX + 8, cardY + 8, cardX + 8, cardY + 8 + accLen);
+        // Top-right corner
+        g2d.drawLine(cardX + cardWidth - 8, cardY + 8, cardX + cardWidth - 8 - accLen, cardY + 8);
+        g2d.drawLine(cardX + cardWidth - 8, cardY + 8, cardX + cardWidth - 8, cardY + 8 + accLen);
+        // Bottom-left corner
+        g2d.drawLine(cardX + 8, cardY + cardHeight - 8, cardX + 8 + accLen, cardY + cardHeight - 8);
+        g2d.drawLine(cardX + 8, cardY + cardHeight - 8, cardX + 8, cardY + cardHeight - 8 - accLen);
+        // Bottom-right corner
+        g2d.drawLine(cardX + cardWidth - 8, cardY + cardHeight - 8, cardX + cardWidth - 8 - accLen, cardY + cardHeight - 8);
+        g2d.drawLine(cardX + cardWidth - 8, cardY + cardHeight - 8, cardX + cardWidth - 8, cardY + cardHeight - 8 - accLen);
+
+        // 3. Header: "PAUSED" with pulsating glow
+        float pulse = (float) (0.85 + 0.15 * Math.sin(System.currentTimeMillis() / 220.0));
+        g2d.setFont(new java.awt.Font("Impact", java.awt.Font.PLAIN, 46));
+        String title = "GAME PAUSED";
+        int titleW = g2d.getFontMetrics().stringWidth(title);
+
+        // Glowing title shadow
+        g2d.setColor(new java.awt.Color(0, 200, 255, (int) (120 * pulse)));
+        g2d.drawString(title, cardX + (cardWidth - titleW) / 2 + 2, cardY + 65 + 2);
+        // Title text
+        g2d.setColor(new java.awt.Color(240, 250, 255));
+        g2d.drawString(title, cardX + (cardWidth - titleW) / 2, cardY + 65);
+
+        // Subtitle
+        g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 13));
+        g2d.setColor(new java.awt.Color(130, 170, 210));
+        String sub = "MATCH IS CURRENTLY SUSPENDED";
+        int subW = g2d.getFontMetrics().stringWidth(sub);
+        g2d.drawString(sub, cardX + (cardWidth - subW) / 2, cardY + 92);
+
+        // Divider Line
+        java.awt.Paint oldPaint = g2d.getPaint();
+        g2d.setPaint(new java.awt.GradientPaint(
+            cardX + 40, cardY + 110, new java.awt.Color(0, 200, 255, 0),
+            cardX + cardWidth / 2, cardY + 110, new java.awt.Color(0, 220, 255, 220),
+            true
+        ));
+        g2d.setStroke(new java.awt.BasicStroke(1.5f));
+        g2d.drawLine(cardX + 40, cardY + 110, cardX + cardWidth - 40, cardY + 110);
+        g2d.setPaint(oldPaint);
+
+        // 4. Instructions / Actions list
+        int listY = cardY + 150;
+        int rowSpacing = 42;
+
+        drawPauseActionItem(g2d, cardX + 60, listY, "P", "or  [ START ]", "Resume Battle", new java.awt.Color(0, 255, 170));
+        drawPauseActionItem(g2d, cardX + 60, listY + rowSpacing, "ENTER", null, "Character Selection / Lobby", new java.awt.Color(255, 200, 60));
+        drawPauseActionItem(g2d, cardX + 60, listY + rowSpacing * 2, "ESC", null, "Exit Game", new java.awt.Color(255, 90, 90));
+
+        // 5. Score summary footer inside card
+        g2d.setColor(new java.awt.Color(30, 40, 65, 200));
+        g2d.fillRoundRect(cardX + 40, cardY + cardHeight - 56, cardWidth - 80, 36, 12, 12);
+        g2d.setColor(new java.awt.Color(70, 100, 150, 180));
+        g2d.setStroke(new java.awt.BasicStroke(1f));
+        g2d.drawRoundRect(cardX + 40, cardY + cardHeight - 56, cardWidth - 80, 36, 12, 12);
+
+        g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 13));
+        g2d.setColor(java.awt.Color.WHITE);
+        String scoreText = "CURRENT SCORE  —  PLAYER 1 : " + A + "  |  PLAYER 2 : " + B;
+        int scoreW = g2d.getFontMetrics().stringWidth(scoreText);
+        g2d.drawString(scoreText, cardX + (cardWidth - scoreW) / 2, cardY + cardHeight - 33);
+    }
+
+    private void drawPauseActionItem(java.awt.Graphics2D g2d, int x, int y, String key, String extraKey, String actionText, java.awt.Color accentColor) {
+        // Key Badge
+        int badgeW = Math.max(34, g2d.getFontMetrics(new java.awt.Font("Arial", java.awt.Font.BOLD, 13)).stringWidth(key) + 16);
+        int badgeH = 26;
+
+        // Key badge shadow
+        g2d.setColor(new java.awt.Color(0, 0, 0, 120));
+        g2d.fillRoundRect(x + 2, y - 18 + 2, badgeW, badgeH, 8, 8);
+
+        // Key badge background
+        g2d.setColor(new java.awt.Color(40, 50, 75));
+        g2d.fillRoundRect(x, y - 18, badgeW, badgeH, 8, 8);
+
+        // Key badge border
+        g2d.setColor(accentColor);
+        g2d.setStroke(new java.awt.BasicStroke(1.5f));
+        g2d.drawRoundRect(x, y - 18, badgeW, badgeH, 8, 8);
+
+        // Key text
+        g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 13));
+        g2d.setColor(java.awt.Color.WHITE);
+        int keyW = g2d.getFontMetrics().stringWidth(key);
+        g2d.drawString(key, x + (badgeW - keyW) / 2, y);
+
+        int curX = x + badgeW + 12;
+
+        if (extraKey != null && !extraKey.isEmpty()) {
+            g2d.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 12));
+            g2d.setColor(new java.awt.Color(160, 180, 210));
+            g2d.drawString(extraKey, curX, y - 1);
+            curX += g2d.getFontMetrics().stringWidth(extraKey) + 12;
+        }
+
+        // Action Description
+        g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+        g2d.setColor(new java.awt.Color(225, 235, 245));
+        g2d.drawString(actionText, curX + 10, y);
     }
 
 }

@@ -30,6 +30,9 @@ public class KeyBindings {
     public static int p2Attack3 = KeyEvent.VK_NUMPAD3;
     public static int p2Special = KeyEvent.VK_NUMPAD4;
 
+    // Pause Key
+    public static int pauseKey = KeyEvent.VK_P;
+
     public static void load() {
         Properties props = new Properties();
         File f = new File(CONFIG_FILE);
@@ -54,6 +57,7 @@ public class KeyBindings {
                 p2Attack2 = Integer.parseInt(props.getProperty("p2Attack2", String.valueOf(KeyEvent.VK_NUMPAD2)));
                 p2Attack3 = Integer.parseInt(props.getProperty("p2Attack3", String.valueOf(KeyEvent.VK_NUMPAD3)));
                 p2Special = Integer.parseInt(props.getProperty("p2Special", String.valueOf(KeyEvent.VK_NUMPAD4)));
+                pauseKey = Integer.parseInt(props.getProperty("pauseKey", String.valueOf(KeyEvent.VK_P)));
                 
             } catch (IOException | NumberFormatException e) {
                 System.err.println("Error loading controls, using defaults.");
@@ -82,6 +86,7 @@ public class KeyBindings {
         props.setProperty("p2Attack2", String.valueOf(p2Attack2));
         props.setProperty("p2Attack3", String.valueOf(p2Attack3));
         props.setProperty("p2Special", String.valueOf(p2Special));
+        props.setProperty("pauseKey", String.valueOf(pauseKey));
 
         try (FileOutputStream out = new FileOutputStream(CONFIG_FILE)) {
             props.store(out, "MIDGAME Control Bindings");

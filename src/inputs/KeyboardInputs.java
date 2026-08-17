@@ -57,6 +57,14 @@ public class KeyboardInputs implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        // Toggle pause with pauseKey or VK_PAUSE
+        if (e.getKeyCode() == KeyBindings.pauseKey || e.getKeyCode() == KeyEvent.VK_PAUSE) {
+            if (gamePanel.getGame() != null) {
+                gamePanel.getGame().togglePause();
+            }
+            return;
+        }
+
         switch (e.getKeyCode()) {
             case KeyEvent.VK_ENTER:
                 if (gamePanel.getGame() != null) {
@@ -79,6 +87,11 @@ public class KeyboardInputs implements KeyListener {
         }
 
         if (gamePanel.getGame() == null || gamePanel.getGame().getPlayer1() == null || gamePanel.getGame().getPlayer2() == null) {
+            return;
+        }
+
+        // Do not process movement or attack inputs while paused
+        if (gamePanel.getGame().isPaused()) {
             return;
         }
 

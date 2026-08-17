@@ -244,16 +244,18 @@ public class Player1 extends Entity {
         }
 
         public void render(Graphics g) {
-               if (currentHealth <= 0){playerAction = DEAD;
-               
-               float seconds = (float) (6);
-               }
+            if (currentHealth <= 0) {
+                playerAction = DEAD;
+            }
             
-                drawDashTrails(g);
-		g.drawImage(animations[playerAction][aniIndex], (int) (hitbox.x - xDrawOffset) + flipX, (int) (hitbox.y - yDrawOffset), width * flipW, height, null);
-                drawStatusEffects(g);
-                drawUI(g);
-	}
+            drawDashTrails(g);
+            if (animations != null && playerAction >= 0 && playerAction < animations.length && animations[playerAction] != null && animations[playerAction].length > 0) {
+                int safeAniIndex = Math.max(0, Math.min(aniIndex, animations[playerAction].length - 1));
+                g.drawImage(animations[playerAction][safeAniIndex], (int) (hitbox.x - xDrawOffset) + flipX, (int) (hitbox.y - yDrawOffset), width * flipW, height, null);
+            }
+            drawStatusEffects(g);
+            drawUI(g);
+        }
         
         public int health2(){
             return currentHealth;
@@ -835,23 +837,37 @@ public class Player1 extends Entity {
     private final long COOLDOWN_TIME_SKILL3 = 3500;
     private final long COOLDOWN_TIME_HADOUKEN = 1500;
 
+    public void adjustCooldownsForPause(long pauseDuration) {
+        this.lastSkill1Time += pauseDuration;
+        this.lastSkill2Time += pauseDuration;
+        this.lastSkill3Time += pauseDuration;
+        this.lastHadoukenTime += pauseDuration;
+    }
+
+    private long getCurrentOrPausedTime() {
+        if (gameInstance != null && gameInstance.isPaused()) {
+            return gameInstance.getPauseStartTime();
+        }
+        return System.currentTimeMillis();
+    }
+
     public long getSkill1CooldownRemaining() {
-        long elapsed = System.currentTimeMillis() - lastSkill1Time;
+        long elapsed = getCurrentOrPausedTime() - lastSkill1Time;
         return Math.max(0, COOLDOWN_TIME_SKILL1 - elapsed);
     }
 
     public long getSkill2CooldownRemaining() {
-        long elapsed = System.currentTimeMillis() - lastSkill2Time;
+        long elapsed = getCurrentOrPausedTime() - lastSkill2Time;
         return Math.max(0, COOLDOWN_TIME_SKILL2 - elapsed);
     }
 
     public long getSkill3CooldownRemaining() {
-        long elapsed = System.currentTimeMillis() - lastSkill3Time;
+        long elapsed = getCurrentOrPausedTime() - lastSkill3Time;
         return Math.max(0, COOLDOWN_TIME_SKILL3 - elapsed);
     }
 
     public long getHadoukenCooldownRemaining() {
-        long elapsed = System.currentTimeMillis() - lastHadoukenTime;
+        long elapsed = getCurrentOrPausedTime() - lastHadoukenTime;
         return Math.max(0, COOLDOWN_TIME_HADOUKEN - elapsed);
     }
 
